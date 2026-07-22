@@ -9,15 +9,16 @@ Add a reusable native input atom matching Figma node `22152:46`. Bind the input 
 - Location: `apps/link-sharing/src/app/atoms/input/input.component.ts`
 - Selector: `app-input`
 - Standalone Angular component using `ChangeDetectionStrategy.OnPush`
-- Native `<input>` bound with the Signal Forms `[field]` directive
+- Native `<input>` bound with the Angular 22 Signal Forms `[formField]` directive
 - Inline template; component-specific styles remain colocated unless an existing global style convention requires a focused input partial
 - Inline decorative link SVG; hidden from assistive technology
 
 ## Public API
 
-- `formField`: required generic `FieldTree<T>` used by `[field]`, where `T` supports text values or numeric values including the native empty-number value `null`
+- `formField`: required generic `Field<T>` used by `[formField]`, where `T` supports text values or numeric values including the native empty-number value `null`
 - `placeholder`: optional string, default empty
 - `type`: supported native input type (`text`, `email`, `password`, `number`, `url`, `tel`, or `search`), default `text`
+- Pair `type="number"` with `Field<number | null>` and all other supported types with `Field<string>`
 - `min`: optional string or number passed to the native minimum attribute for compatible input types
 - `max`: optional string or number passed to the native maximum attribute for compatible input types
 - `ariaLabel`: required accessible name
@@ -42,6 +43,7 @@ Add a reusable native input atom matching Figma node `22152:46`. Bind the input 
 - Error message receives a stable generated ID and is connected through `aria-describedby`
 - Decorative SVG uses `aria-hidden="true"`
 - Native keyboard and focus behavior remain intact
+- A focused error state keeps the red treatment and adds a red glow so keyboard focus remains visible
 
 ## Scope And Verification
 

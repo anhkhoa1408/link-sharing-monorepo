@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AvatarModule } from './avatar/avatar.module';
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment.schema';
 import { PrismaModule } from './prisma/prisma.module';
@@ -18,6 +19,7 @@ import { HealthService } from './health/health.service';
     SupabaseModule,
     AppCacheModule,
     AuthModule,
+    AvatarModule,
   ],
   controllers: [HealthController],
   providers: [HealthService],

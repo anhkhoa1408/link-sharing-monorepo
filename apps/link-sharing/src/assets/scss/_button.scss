@@ -1,8 +1,5 @@
-app-button {
-  display: block;
-  width: 100%;
-
-  .button.mat-mdc-button-base {
+.mat-mdc-button-base {
+  &.button {
     width: 100%;
     min-width: 0;
     height: auto;
@@ -17,33 +14,33 @@ app-button {
     &:disabled {
       opacity: 0.25;
     }
-  }
 
-  .button--primary {
-    --mat-button-filled-container-color: var(--color-purple-600);
-    --mat-button-filled-disabled-container-color: var(--color-purple-600);
-    --mat-button-filled-disabled-label-text-color: var(--color-white);
-    --mat-button-filled-hover-state-layer-opacity: 0;
-    --mat-button-filled-pressed-state-layer-opacity: 0;
+    &.button--primary {
+      --mat-button-filled-container-color: var(--color-purple-600);
+      --mat-button-filled-disabled-container-color: var(--color-purple-600);
+      --mat-button-filled-disabled-label-text-color: var(--color-white);
+      --mat-button-filled-hover-state-layer-opacity: 0;
+      --mat-button-filled-pressed-state-layer-opacity: 0;
 
-    &:not(:disabled):hover,
-    &:not(:disabled):active {
-      --mat-button-filled-container-color: var(--color-purple-300);
-      box-shadow: 0 0 16px rgb(99 60 255 / 25%);
+      &:not(:disabled):hover,
+      &:not(:disabled):active {
+        --mat-button-filled-container-color: var(--color-purple-300);
+        box-shadow: 0 0 16px rgb(99 60 255 / 25%);
+      }
     }
-  }
 
-  .button--secondary {
-    --mat-button-outlined-label-text-color: var(--color-purple-600);
-    --mat-button-outlined-outline-color: var(--color-purple-600);
-    --mat-button-outlined-disabled-label-text-color: var(--color-purple-600);
-    --mat-button-outlined-disabled-outline-color: var(--color-purple-600);
-    --mat-button-outlined-hover-state-layer-opacity: 0;
-    --mat-button-outlined-pressed-state-layer-opacity: 0;
+    &.button--secondary {
+      --mat-button-outlined-label-text-color: var(--color-purple-600);
+      --mat-button-outlined-outline-color: var(--color-purple-600);
+      --mat-button-outlined-disabled-label-text-color: var(--color-purple-600);
+      --mat-button-outlined-disabled-outline-color: var(--color-purple-600);
+      --mat-button-outlined-hover-state-layer-opacity: 0;
+      --mat-button-outlined-pressed-state-layer-opacity: 0;
 
-    &:not(:disabled):hover,
-    &:not(:disabled):active {
-      background-color: #efebff;
+      &:not(:disabled):hover,
+      &:not(:disabled):active {
+        background-color: #efebff;
+      }
     }
   }
 }
