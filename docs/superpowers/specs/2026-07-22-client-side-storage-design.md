@@ -14,11 +14,11 @@ Provide an SSR-safe, generic JSON abstraction over browser `localStorage` for th
 
 ## File Structure
 
-All storage abstractions live together under `apps/link-sharing/src/app/storage/`:
+Storage concerns live under the Angular application's non-exposed `core` area and are grouped by responsibility:
 
-- `client-side-storage.ts`: the public storage contract.
-- `local-storage.service.ts`: the browser `localStorage` implementation and SSR guard.
-- `storage-key.ts`: centralized storage-key constants.
+- `apps/link-sharing/src/app/core/models/client-side-storage.model.ts`: the internal storage contract.
+- `apps/link-sharing/src/app/core/services/local-storage.service.ts`: the Angular service implementing browser `localStorage` with an SSR guard. Its file and class names follow the Angular Style Guide, and it uses `@Injectable({ providedIn: 'root' })`.
+- `apps/link-sharing/src/app/core/constants/storage-key.constant.ts`: centralized storage-key constants.
 
 ## Interface
 
@@ -53,17 +53,13 @@ The service does not catch browser storage, serialization, or parsing errors. Ma
 
 ## Storage Keys
 
-`StorageKey` cannot be instantiated and exposes constants as `public static readonly` members:
+`StorageKey` exposes constants as `public static readonly` members:
 
 ```ts
 export class StorageKey {
   public static readonly ACCESS_TOKEN = 'ACCESS_TOKEN';
-
-  private constructor() {}
 }
 ```
-
-New application-wide keys can be added to this class when they have a real consumer.
 
 ## Verification
 
