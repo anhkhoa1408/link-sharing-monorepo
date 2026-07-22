@@ -6,7 +6,7 @@ Add a reusable Angular Material button atom matching the supplied Figma primary 
 
 ## Component API
 
-- Location: `apps/link-sharing/src/app/components/atoms/button/`
+- Location: `apps/link-sharing/src/app/atoms/button/`
 - Class: `Button`
 - Selector: `app-button`
 - Standalone Angular component using `ChangeDetectionStrategy.OnPush`
