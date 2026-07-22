@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Platform, Prisma } from '../../generated/prisma/client';
 import { CreateLinkDto } from './dto/create-link.dto';
 import { LinkResponseDto } from './dto/link-response.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
@@ -12,19 +11,24 @@ import {
   INVALID_LINK_URL,
   LINK_ALREADY_EXISTS,
   LINK_NOT_FOUND,
-  PLATFORM_HOSTS,
-} from './link.constants';
+} from './constants/link.constants';
+import {
+  InvalidLinkUrlError,
+  LinkAlreadyExistsError,
+  LinkNotFoundError,
+} from './errors/link.errors';
 import { LinkRepository } from './link.repository';
+import { validateAndNormalizeLinkUrl } from './validators/link-url.validator';
 
 @Injectable()
 export class LinkService {
   constructor(private readonly links: LinkRepository) {}
 
   create(userId: string, input: CreateLinkDto): Promise<LinkResponseDto> {
-    return this.callPersistence(() =>
+    return this.callRepository(() =>
       this.links.create(userId, {
         platform: input.platform,
-        url: this.normalizeUrl(input.platform, input.url),
+        url: validateAndNormalizeLinkUrl(input.platform, input.url),
       }),
     );
   }
@@ -48,51 +52,32 @@ export class LinkService {
     id: string,
     input: UpdateLinkDto,
   ): Promise<LinkResponseDto> {
-    return this.callPersistence(() =>
+    return this.callRepository(() =>
       this.links.updateOwned(id, userId, {
         platform: input.platform,
-        url: this.normalizeUrl(input.platform, input.url),
+        url: validateAndNormalizeLinkUrl(input.platform, input.url),
       }),
     );
   }
 
   remove(userId: string, id: string): Promise<void> {
-    return this.callPersistence(() => this.links.deleteOwned(id, userId));
+    return this.callRepository(() => this.links.deleteOwned(id, userId));
   }
 
-  private normalizeUrl(platform: Platform, value: string): string {
-    let url: URL;
-
-    try {
-      url = new URL(value);
-    } catch {
-      throw new BadRequestException(INVALID_LINK_URL);
-    }
-
-    const hostname = url.hostname.toLowerCase();
-    const matchesPlatform = PLATFORM_HOSTS[platform].some(
-      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
-    );
-
-    if (url.protocol !== 'https:' || !matchesPlatform) {
-      throw new BadRequestException(INVALID_LINK_URL);
-    }
-
-    return url.toString();
-  }
-
-  private async callPersistence<T>(operation: () => Promise<T>): Promise<T> {
+  private async callRepository<T>(operation: () => Promise<T>): Promise<T> {
     try {
       return await operation();
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictException(LINK_ALREADY_EXISTS);
-        }
+      if (error instanceof InvalidLinkUrlError) {
+        throw new BadRequestException(INVALID_LINK_URL);
+      }
 
-        if (error.code === 'P2025') {
-          throw new NotFoundException(LINK_NOT_FOUND);
-        }
+      if (error instanceof LinkAlreadyExistsError) {
+        throw new ConflictException(LINK_ALREADY_EXISTS);
+      }
+
+      if (error instanceof LinkNotFoundError) {
+        throw new NotFoundException(LINK_NOT_FOUND);
       }
 
       throw error;

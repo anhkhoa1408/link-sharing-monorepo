@@ -1,4 +1,4 @@
-import { Platform } from '../../generated/prisma/enums';
+import { Platform } from '../../../generated/prisma/enums';
 
 export const PLATFORM_HOSTS = {
   [Platform.GITHUB]: ['github.com'],

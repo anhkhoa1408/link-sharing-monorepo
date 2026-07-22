@@ -13,15 +13,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AuthenticatedPrincipal } from '../auth/strategies/jwt.strategy';
 import { CreateLinkDto } from './dto/create-link.dto';
 import { LinkResponseDto } from './dto/link-response.dto';
 import { UpdateLinkDto } from './dto/update-link.dto';
 import { LinkService } from './link.service';
-
-interface AuthenticatedRequest {
-  user: AuthenticatedPrincipal;
-}
+import { AuthenticatedRequest } from './types/link.types';
 
 @Controller('users/me/links')
 @UseGuards(JwtAuthGuard)
