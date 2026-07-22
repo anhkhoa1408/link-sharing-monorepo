@@ -7,6 +7,9 @@ tmp/
 out-tsc/
 coverage/
 
+# Prisma generated client
+apps/api/src/generated/prisma/
+
 # NestJS / TypeScript build artifacts
 *.tsbuildinfo
 .swc/
