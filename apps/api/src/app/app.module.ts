@@ -8,6 +8,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { AppCacheModule } from './cache/app-cache.module';
 import { HealthController } from './health/health.controller';
 import { HealthService } from './health/health.service';
+import { LinkModule } from './link/link.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HealthService } from './health/health.service';
     AppCacheModule,
     AuthModule,
     AvatarModule,
+    LinkModule,
   ],
   controllers: [HealthController],
   providers: [HealthService],
