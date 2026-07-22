@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+tmp/
+out-tsc/
+coverage/
+
+# NestJS / TypeScript build artifacts
+*.tsbuildinfo
+.swc/
+.cache/
+webpack-stats.json
+
+# Nx and Angular caches
+.nx/cache/
+.nx/workspace-data/
+.nx/polygraph/
+.nx/self-healing/
+.nx/migrate-runs/
+.angular/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test and tooling artifacts
+__screenshots__/
+.playwright-mcp/
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+
+# Local databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Editors and IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.project
+.classpath
+.settings/
+.c9/
+*.launch
+*.sublime-workspace
+
+# Local AI/tool configuration
+.claude/settings.local.json
+.claude/worktrees/
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Miscellaneous generated files
+.sass-cache/
+connect.lock
+libpeerconnection.log
+testem.log
+typings/
+
+# Operating system files
+.DS_Store
+Thumbs.db

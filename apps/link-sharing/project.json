@@ -1,0 +1,96 @@
+{
+  "name": "link-sharing",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/link-sharing/src",
+  "cli": {
+    "cache": {
+      "enabled": false
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/link-sharing",
+        "browser": "apps/link-sharing/src/main.ts",
+        "tsConfig": "apps/link-sharing/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/link-sharing/public"
+          }
+        ],
+        "styles": ["apps/link-sharing/src/styles.scss"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "dependsOn": ["api:serve"],
+      "defaultConfiguration": "development",
+      "options": {
+        "proxyConfig": "apps/link-sharing/proxy.conf.json"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "link-sharing:build:production"
+        },
+        "development": {
+          "buildTarget": "link-sharing:build:development"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@angular/build:unit-test",
+      "options": {
+        "watch": false
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p apps/link-sharing/tsconfig.app.json"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "link-sharing:build",
+        "staticFilePath": "dist/apps/link-sharing/browser",
+        "spa": true
+      }
+    }
+  }
+}

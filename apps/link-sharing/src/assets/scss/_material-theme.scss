@@ -1,0 +1,29 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$blue-palette,
+        tertiary: mat.$violet-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: 'Instrument Sans',
+        brand-family: 'Instrument Sans',
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    ),
+    $overrides: (
+      primary: var(--color-blue-500),
+      on-primary: var(--color-white),
+      error: var(--color-red-500),
+      on-error: var(--color-white)
+    )
+  );
+}

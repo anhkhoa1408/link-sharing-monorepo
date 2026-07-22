@@ -1,0 +1,62 @@
+$_base-colors: (
+  'white': #ffffff,
+  'black': #000000,
+);
+
+$_palette-colors: (
+  'grey': (
+    '950': #1a1a1a,
+    '900': #333333,
+    '500': #737373,
+    '200': #d9d9d9,
+    '100': #eeeeee,
+    '50': #fafafa,
+  ),
+  'blue': (
+    '800': #0330d1,
+    '500': #2d68ff,
+  ),
+  'purple': (
+    '950': #302267,
+    '600': #633cff,
+    '300': #beadff,
+  ),
+  'red': (
+    '550': #ee3939,
+    '500': #ff3939,
+  ),
+  'pink': (
+    '900': #8a1a50,
+    '400': #f4a28c,
+  ),
+  'orange': (
+    '600': #ec7100,
+    '500': #eb4925,
+  ),
+);
+
+:root {
+  @each $name, $value in $_base-colors {
+    --color-#{$name}: #{$value};
+  }
+
+  @each $family, $shades in $_palette-colors {
+    @each $shade, $value in $shades {
+      --color-#{$family}-#{$shade}: #{$value};
+    }
+  }
+}
+
+@each $name, $value in $_base-colors {
+  .color__#{$name} {
+    color: var(--color-#{$name});
+  }
+}
+
+@each $family, $shades in $_palette-colors {
+  @each $shade, $value in $shades {
+    .color__#{$family}--#{$shade} {
+      color: var(--color-#{$family}-#{$shade});
+    }
+  }
+}
