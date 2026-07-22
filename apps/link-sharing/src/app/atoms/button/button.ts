@@ -12,7 +12,16 @@ export type ButtonVariant = 'primary' | 'secondary';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton],
   selector: 'app-button',
-  templateUrl: './button.html',
+  template: `
+    <button
+      [matButton]="appearance()"
+      [class]="buttonClass()"
+      [disabled]="disabled()"
+      type="button"
+    >
+      <ng-content />
+    </button>
+  `,
 })
 export class Button {
   readonly variant = input<ButtonVariant>('primary');
