@@ -4,12 +4,6 @@
 
 Add a reusable Angular Material button atom matching the supplied Figma primary and secondary button designs.
 
-## Files
-
-- `apps/link-sharing/src/app/atoms/button/button.ts` contains the standalone component and its inline template.
-- `apps/link-sharing/src/assets/scss/_button.scss` contains the global button override, imported by `apps/link-sharing/src/assets/scss/index.scss`.
-- No external button HTML template or committed component spec is included: the application convention requires inline templates and prohibits `*.spec.ts` files.
-
 ## Component API
 
 - Location: `apps/link-sharing/src/app/atoms/button/`
@@ -55,13 +49,15 @@ Existing CSS custom properties are used where matching tokens exist. Light purpl
 
 ## Tests
 
-The transient TDD specification used while developing this atom was removed before the final tree because the repository convention prohibits `*.spec.ts` files in `apps/link-sharing`.
+Component tests verify:
 
-Final verification uses Nx lint, typecheck, and build targets. The broader requested command also runs the existing app test target:
+- Primary is the default variant and uses filled Material appearance.
+- Secondary input uses outlined Material appearance.
+- Disabled input disables the Material button.
+- Projected label renders.
+- Component and inner button fill available width.
 
-```bash
-npm exec -- nx run-many -t test,lint,typecheck,build -p link-sharing
-```
+Tests use Angular Material's `MatButtonHarness` where behavior is exposed by the harness, with DOM/style assertions for component-specific presentation.
 
 ## Scope
 
