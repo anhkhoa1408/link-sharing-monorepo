@@ -23,12 +23,17 @@
 ## Angular Conventions
 
 - Follow the current Angular best practices and use standalone APIs.
+- Name component classes, selectors, and files according to the official Angular Style Guide.
 - Keep the application zoneless; do not introduce Zone.js-dependent patterns.
 - Prefer Signals for local, shared, and derived UI state.
 - Use `signal`, `computed`, and `effect` deliberately; avoid effects for state derivation.
 - Set `ChangeDetectionStrategy.OnPush` on components to reduce unnecessary checks.
 - Prefer `input()`, `output()`, and signal queries over decorator-based APIs.
 - Keep components focused on presentation and interaction; move business logic to services.
+- Give each component one clear responsibility and keep it focused on doing that responsibility well.
+- Do not perform business logic or data calculations in templates; compute or derive values in the component class or a service and expose presentation-ready state to the template.
+- Use inline component templates with the `template` property; do not create separate component `.html` template files.
+- Use Angular's `httpResource` API for reactive API reads and data fetching; use `HttpClient` directly for mutations such as `POST`, `PUT`, `PATCH`, and `DELETE`.
 - Use lazy-loaded routes for feature areas and functional guards/interceptors.
 - Use Angular Signal Forms from `@angular/forms/signals` for all forms.
 - Use the built-in control flow syntax (`@if`, `@for`, `@switch`).
@@ -37,9 +42,16 @@
 - Keep templates accessible: semantic HTML, labels, keyboard support, and visible focus.
 - Do not expose backend secrets or privileged Supabase clients to browser code.
 
+### Atomic Design
+
+- Organize frontend UI components according to Atomic Design.
+- Place components in the appropriate directory under `apps/link-sharing/src/app`: `atoms`, `molecules`, `organisms`, or `templates`.
+- Classify each component by its level of composition and responsibility before choosing its directory.
+
 ## NestJS Conventions
 
 - Follow NestJS best practices and organize the API into cohesive feature modules.
+- Do not create or add tests of any kind for the NestJS API.
 - Follow MVC with this dependency flow: `Controller -> Service -> Repository -> Database`.
 - Controllers handle HTTP input/output only and must remain thin.
 - Services coordinate business rules and use cases; they must not query Prisma directly.
@@ -50,6 +62,11 @@
 - Validate request data with DTOs and validate environment variables at startup.
 - Use Nest exceptions and centralized filters/interceptors for consistent API errors.
 - Keep transport, business, and persistence concerns separate.
+
+## Testing Conventions
+
+- Do not create or add any tests for either `apps/link-sharing` or `apps/api`, including unit, integration, and end-to-end tests.
+- Do not create test files of any naming convention or format in either application.
 
 ## Data and Infrastructure
 
