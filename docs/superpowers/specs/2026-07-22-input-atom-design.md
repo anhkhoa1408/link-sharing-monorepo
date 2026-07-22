@@ -15,9 +15,11 @@ Add a reusable native input atom matching Figma node `22152:46`. Bind the input 
 
 ## Public API
 
-- `formField`: required `FieldTree<string>` used by `[field]`
+- `formField`: required generic `FieldTree<T>` used by `[field]`, where `T` supports text values or numeric values including the native empty-number value `null`
 - `placeholder`: optional string, default empty
-- `type`: native text-compatible input type, default `text`
+- `type`: supported native input type (`text`, `email`, `password`, `number`, `url`, `tel`, or `search`), default `text`
+- `min`: optional string or number passed to the native minimum attribute for compatible input types
+- `max`: optional string or number passed to the native maximum attribute for compatible input types
 - `ariaLabel`: required accessible name
 - `isError`: boolean visual error state, default `false`
 - `errorMessage`: optional string shown only while `isError` is true
@@ -31,6 +33,7 @@ Add a reusable native input atom matching Figma node `22152:46`. Bind the input 
 - Error text: 12px regular Instrument Sans, red, below input
 - Field/error vertical gap: 8px (`--spacing-100`)
 - Width follows containing block rather than hard-coding Figma's 480px example width
+- Number inputs hide browser spinner controls in WebKit and Firefox without changing keyboard entry or native `min`/`max` validation
 
 ## Accessibility
 
