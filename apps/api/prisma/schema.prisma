@@ -6,4 +6,30 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-q
+
+enum Platform {
+  GITHUB
+  FRONTEND_MENTOR
+  TWITTER
+  LINKEDIN
+  YOUTUBE
+  FACEBOOK
+  TWITCH
+  DEV_TO
+  CODEWARS
+  FREE_CODE_CAMP
+  GITLAB
+  HASHNODE
+  STACK_OVERFLOW
+}
+
+model Link {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  platform  Platform
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, url])
+}
