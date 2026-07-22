@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an SSR-safe, generic JSON interface and Angular `localStorage` service, plus a centralized access-token storage key.
+**Goal:** Add an SSR-safe, generic JSON interface and Angular `localStorage` service, centralize the access-token key, and use the abstraction from `AuthService`.
 
 **Architecture:** Keep frontend-only infrastructure inside `apps/link-sharing/src/app/core`, separated into model, service, and constant folders. The root-provided service implements the generic interface, guards all browser-global access with Angular platform detection, and lets browser storage or JSON errors propagate.
 
@@ -17,7 +17,7 @@
 - In the browser, JSON and storage errors must propagate to the caller.
 - Do not create or add tests for `apps/link-sharing`.
 - Run verification through Nx.
-- Do not modify `AuthService` as part of this change.
+- Preserve `AuthService.save(session: LoginResponse): void` while storing only `session.accessToken` through the new service.
 
 ---
 
@@ -138,15 +138,56 @@ git add apps/link-sharing/src/app/core/services/local-storage.service.ts
 git commit -m "feat: add local storage service"
 ```
 
-### Task 3: Verify the completed frontend change
+### Task 3: Integrate storage with AuthService
+
+**Files:**
+- Modify: `apps/link-sharing/src/app/core/auth.service.ts`
+
+**Interfaces:**
+- Consumes: `LocalStorageService.set<string>(key: string, value: string): void`, `StorageKey.ACCESS_TOKEN`, and `LoginResponse.accessToken`.
+- Produces: `AuthService.save(session: LoginResponse): void`, preserving the API used by `LoginComponent`.
+
+- [ ] **Step 1: Replace direct localStorage access with the storage service**
+
+```ts
+import { inject, Injectable } from '@angular/core';
+import type { LoginResponse } from '@link-sharing/shared-models';
+import { StorageKey } from './constants/storage-key.constant';
+import { LocalStorageService } from './services/local-storage.service';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly storage = inject(LocalStorageService);
+
+  public save(session: LoginResponse): void {
+    this.storage.set(StorageKey.ACCESS_TOKEN, session.accessToken);
+  }
+}
+```
+
+- [ ] **Step 2: Run focused frontend checks**
+
+Run: `npm exec -- nx run-many -t lint,typecheck -p link-sharing`
+
+Expected: Nx reports both targets succeeded.
+
+- [ ] **Step 3: Commit the AuthService integration**
+
+```bash
+git add apps/link-sharing/src/app/core/auth.service.ts
+git commit -m "refactor: use local storage service for auth"
+```
+
+### Task 4: Verify the completed frontend change
 
 **Files:**
 - Verify only: `apps/link-sharing/src/app/core/models/client-side-storage.model.ts`
 - Verify only: `apps/link-sharing/src/app/core/constants/storage-key.constant.ts`
 - Verify only: `apps/link-sharing/src/app/core/services/local-storage.service.ts`
+- Verify only: `apps/link-sharing/src/app/core/auth.service.ts`
 
 **Interfaces:**
-- Consumes: All artifacts produced by Tasks 1 and 2.
+- Consumes: All artifacts produced by Tasks 1 through 3.
 - Produces: A linted, typechecked, production-buildable Angular application.
 
 - [ ] **Step 1: Confirm no prohibited test files were introduced**
@@ -171,4 +212,4 @@ Expected: No output and exit code 0.
 
 Run: `git status --short`
 
-Expected: The implementation adds only the three planned core files; unrelated pre-existing user changes remain untouched.
+Expected: The implementation contains only the planned storage files and `AuthService` integration; unrelated pre-existing user changes remain untouched.

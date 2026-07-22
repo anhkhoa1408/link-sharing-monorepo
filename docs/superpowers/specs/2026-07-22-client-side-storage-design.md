@@ -9,7 +9,7 @@ Provide an SSR-safe, generic JSON abstraction over browser `localStorage` for th
 - Add a `ClientSideStorage` interface with `get`, `set`, `delete`, and `clear` methods.
 - Add a root-provided `LocalStorageService` that implements the interface.
 - Add a `StorageKey` constants class containing `ACCESS_TOKEN`.
-- Do not change `AuthService`; its existing session key and stored value have different semantics from the requested access-token key.
+- Update the frontend `AuthService` to store `LoginResponse.accessToken` through `LocalStorageService` using `StorageKey.ACCESS_TOKEN`.
 - Do not add tests, as application tests are prohibited by the repository conventions.
 
 ## File Structure
@@ -19,6 +19,7 @@ Storage concerns live under the Angular application's non-exposed `core` area an
 - `apps/link-sharing/src/app/core/models/client-side-storage.model.ts`: the internal storage contract.
 - `apps/link-sharing/src/app/core/services/local-storage.service.ts`: the Angular service implementing browser `localStorage` with an SSR guard. Its file and class names follow the Angular Style Guide, and it uses `@Injectable({ providedIn: 'root' })`.
 - `apps/link-sharing/src/app/core/constants/storage-key.constant.ts`: centralized storage-key constants.
+- `apps/link-sharing/src/app/core/auth.service.ts`: the existing authentication service, modified to use the storage abstraction.
 
 ## Interface
 
@@ -60,6 +61,10 @@ export class StorageKey {
   public static readonly ACCESS_TOKEN = 'ACCESS_TOKEN';
 }
 ```
+
+## Authentication Integration
+
+`AuthService` injects `LocalStorageService` and keeps its existing `save(session: LoginResponse): void` API so `LoginComponent` does not change. The method stores only `session.accessToken` under `StorageKey.ACCESS_TOKEN`; it does not store the complete login response under an access-token key.
 
 ## Verification
 
