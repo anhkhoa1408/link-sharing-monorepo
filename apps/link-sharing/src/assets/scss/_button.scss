@@ -1,0 +1,49 @@
+app-button {
+  display: block;
+  width: 100%;
+
+  .button.mat-mdc-button-base {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    padding: var(--spacing-200) var(--spacing-300);
+    border-radius: 8px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: var(--font-size-16);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-150);
+    letter-spacing: 0;
+
+    &:disabled {
+      opacity: 0.25;
+    }
+  }
+
+  .button--primary {
+    --mat-button-filled-container-color: var(--color-purple-600);
+    --mat-button-filled-disabled-container-color: var(--color-purple-600);
+    --mat-button-filled-disabled-label-text-color: var(--color-white);
+    --mat-button-filled-hover-state-layer-opacity: 0;
+    --mat-button-filled-pressed-state-layer-opacity: 0;
+
+    &:not(:disabled):hover,
+    &:not(:disabled):active {
+      --mat-button-filled-container-color: var(--color-purple-300);
+      box-shadow: 0 0 16px rgb(99 60 255 / 25%);
+    }
+  }
+
+  .button--secondary {
+    --mat-button-outlined-label-text-color: var(--color-purple-600);
+    --mat-button-outlined-outline-color: var(--color-purple-600);
+    --mat-button-outlined-disabled-label-text-color: var(--color-purple-600);
+    --mat-button-outlined-disabled-outline-color: var(--color-purple-600);
+    --mat-button-outlined-hover-state-layer-opacity: 0;
+    --mat-button-outlined-pressed-state-layer-opacity: 0;
+
+    &:not(:disabled):hover,
+    &:not(:disabled):active {
+      background-color: #efebff;
+    }
+  }
+}
