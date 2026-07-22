@@ -28,19 +28,21 @@ The NestJS validation DTO implements `AuthCredentials` so decorators remain API-
 
 ## Frontend Architecture
 
-- `LoginPageComponent`: lazy route component responsible for layout, Signal Form state, submit interaction, and presentation-ready messages.
-- `AuthService`: performs the login HTTP mutation and owns the `localStorage` session key.
+- `LoginComponent`: lazy page component responsible for layout, inline SCSS, Signal Form state, submit interaction, and presentation-ready messages.
+- `BaseApiService`: receives `HttpClient` and the same-origin backend base URL `/api` through its constructor and builds endpoint URLs.
+- `AuthApiService`: extends `BaseApiService` and owns the login HTTP mutation.
+- `AuthSessionService`: owns the `localStorage` session key and persists successful login responses.
 - Existing `InputComponent`: gains explicit email/password icon variants needed by the design.
 - Existing `ButtonComponent`: gains native submit type support and remains responsible only for button presentation.
 
-The page uses the existing Atomic Design folders. Shared atoms remain in `atoms`; the composed screen belongs in `templates/login-page`. Auth HTTP and persistence logic belongs in an auth service rather than the template component.
+The page uses the existing Atomic Design folders. Shared atoms remain in `atoms`; route-specific composition belongs in `pages/login`. API calls live in `api`, while session persistence stays separate from the page. `/api` assumes the frontend and backend share an origin in production through a reverse proxy and uses the existing Angular proxy during local development.
 
 ## Data Flow
 
 1. User enters email and password.
 2. Signal Forms expose client validation state.
 3. Invalid submission marks relevant controls and does not call the API.
-4. Valid submission calls `POST /api/auth/login` with `AuthCredentials`.
+4. Valid submission calls `AuthApiService.login()`, which posts `AuthCredentials` to `/api/auth/login`.
 5. While pending, submit is disabled to prevent duplicate requests.
 6. Success stores the full `LoginResponse` in `localStorage`, clears prior errors, and displays an accessible inline success message.
 7. The route stays on `/login`.
@@ -61,6 +63,7 @@ The page uses the existing Atomic Design folders. Shared atoms remain in `atoms`
 - Card padding 40px, 12px radius, and 40px content gap.
 - Form field and action spacing follows the Figma spacing tokens.
 - Instrument Sans typography and existing color/spacing tokens are reused.
+- Page and input component SCSS stays inline and is scoped with `:host`.
 - Small screens remove the card treatment and use compact page padding while preserving hierarchy and touch target sizes.
 
 ## Testing and Verification

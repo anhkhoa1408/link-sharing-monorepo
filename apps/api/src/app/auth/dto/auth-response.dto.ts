@@ -1,15 +1,9 @@
 import { User } from '@supabase/supabase-js';
+import type { LoginResponse } from '@link-sharing/shared-models';
 
 export interface RegisterResponseDto {
   user: User;
   requiresEmailConfirmation: true;
 }
 
-export interface LoginResponseDto {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
-  expiresAt?: number;
-}
+export type LoginResponseDto = LoginResponse;

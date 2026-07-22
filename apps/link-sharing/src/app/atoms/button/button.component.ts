@@ -7,6 +7,7 @@ import {
 import { MatButton, type MatButtonAppearance } from '@angular/material/button';
 
 export type ButtonVariant = 'primary' | 'secondary';
+export type ButtonType = 'button' | 'submit';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,15 +18,16 @@ export type ButtonVariant = 'primary' | 'secondary';
       [matButton]="appearance()"
       [class]="buttonClass()"
       [disabled]="disabled()"
-      type="button"
+      [type]="type()"
     >
       <ng-content />
     </button>
   `,
 })
 export class ButtonComponent {
-  readonly variant = input<ButtonVariant>('primary');
-  readonly disabled = input(false);
+  public readonly variant = input<ButtonVariant>('primary');
+  public readonly disabled = input(false);
+  public readonly type = input<ButtonType>('button');
 
   protected readonly appearance = computed<MatButtonAppearance>(() =>
     this.variant() === 'primary' ? 'filled' : 'outlined',
