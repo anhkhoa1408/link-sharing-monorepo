@@ -12,7 +12,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           alt=""
           class="empty-links__illustration"
           height="160"
-          ngSrc="/images/illustration-empty-links.svg"
+          ngSrc="/images/illustration-empty-links.png"
           priority
           width="250"
         />
