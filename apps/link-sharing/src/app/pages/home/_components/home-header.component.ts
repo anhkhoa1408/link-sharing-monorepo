@@ -1,6 +1,8 @@
 import { NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../atoms/button/button.component';
+import { AuthService } from '../../../core/auth.service';
 import { TabButtonComponent } from '../../../molecules/tab-button/tab-button.component';
 
 @Component({
@@ -24,8 +26,17 @@ import { TabButtonComponent } from '../../../molecules/tab-button/tab-button.com
         <app-tab-button icon="profile" label="Profile Details" />
       </nav>
 
-      <div class="home-header__preview">
-        <app-button variant="secondary">Preview</app-button>
+      <div class="home-header__actions">
+        <app-button
+          class="home-header__action"
+          variant="secondary"
+          (click)="onLogout()"
+        >
+          Logout
+        </app-button>
+        <app-button class="home-header__action" variant="secondary">
+          Preview
+        </app-button>
       </div>
     </header>
   `,
@@ -66,42 +77,57 @@ import { TabButtonComponent } from '../../../molecules/tab-button/tab-button.com
         transform: translateX(-50%);
       }
 
-      &__preview {
+      &__actions {
+        display: flex;
+        gap: var(--spacing-200);
+      }
+
+      &__action {
+        display: block;
         min-width: 108px;
       }
     }
 
-    @media (width < 720px) {
-      .home-header {
-        &__logo {
-          width: 32px;
-          flex-basis: 32px;
-        }
-
-        &__navigation {
-          gap: 0;
-        }
-      }
-    }
-
-    @media (width < 600px) {
+    @media (width < 900px) {
       .home-header {
         display: grid;
         grid-template-columns: 32px minmax(0, 1fr) auto;
         gap: var(--spacing-100);
         padding: var(--spacing-200);
 
+        &__logo {
+          width: 32px;
+          flex-basis: 32px;
+        }
+
         &__navigation {
           position: static;
+          gap: 0;
           justify-self: center;
           transform: none;
         }
+      }
+    }
 
-        &__preview {
+    @media (width < 600px) {
+      .home-header {
+        &__actions {
+          gap: var(--spacing-100);
+        }
+
+        &__action {
           min-width: 0;
         }
       }
     }
   `,
 })
-export class HomeHeaderComponent {}
+export class HomeHeaderComponent {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  public onLogout(): void {
+    this.auth.logout();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
+}

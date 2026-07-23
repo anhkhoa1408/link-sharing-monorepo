@@ -41,6 +41,10 @@ export class AuthService {
     return true;
   }
 
+  public logout(): void {
+    this.storage.delete(StorageKey.ACCESS_TOKEN);
+  }
+
   private isAccessTokenValid(accessToken: string): boolean {
     const expiresAt = this.getExpiresAt(accessToken);
 

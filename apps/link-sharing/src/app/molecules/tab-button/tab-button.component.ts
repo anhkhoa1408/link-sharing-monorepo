@@ -84,7 +84,7 @@ const TAB_BUTTON_ICONS = {
       }
     }
 
-    @media (width < 600px) {
+    @media (width < 720px) {
       .tab-button {
         padding: var(--spacing-200);
 
