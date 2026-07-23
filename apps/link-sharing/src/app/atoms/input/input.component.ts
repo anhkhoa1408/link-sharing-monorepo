@@ -20,6 +20,7 @@ let nextInputId = 0;
     <div class="input" [class.input--error]="isError()">
       <div class="input__control">
         @switch (icon()) {
+          @case (null) {}
           @case ('email') {
             <svg
               aria-hidden="true"
@@ -88,7 +89,7 @@ export class InputComponent<T extends string | number | null> {
   public readonly formField = input.required<Field<T>>();
   public readonly inputId = input(`app-input-${this.instanceId}`);
   public readonly placeholder = input('');
-  public readonly icon = input<InputIcon>('link');
+  public readonly icon = input<InputIcon | null>('link');
 
   /** Pair `number` with a `Field<number | null>`; other types use `Field<string>`. */
   public readonly type = input<InputType>('text');

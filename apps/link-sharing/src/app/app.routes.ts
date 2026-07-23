@@ -24,5 +24,13 @@ export const appRoutes: Route[] = [
         (module) => module.HomeComponent,
       ),
   },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/profile/profile.component').then(
+        (module) => module.ProfileComponent,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 ];

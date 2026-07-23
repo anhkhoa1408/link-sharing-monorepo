@@ -42,6 +42,7 @@ export class ImageUploadComponent implements OnDestroy {
 
   public readonly imageUrl = input<string | null>(null);
   public readonly imageSelected = output<File>();
+  public readonly fileRejected = output<string>();
 
   protected readonly previewUrl = computed(
     () => this.localPreviewUrl() ?? this.imageUrl(),
@@ -63,6 +64,12 @@ export class ImageUploadComponent implements OnDestroy {
     const file = input.files?.item(0);
 
     if (!file) {
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      input.value = '';
+      this.fileRejected.emit('Image must not exceed 5 MB.');
       return;
     }
 
