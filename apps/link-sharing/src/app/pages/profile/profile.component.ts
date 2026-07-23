@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -16,21 +15,12 @@ import {
   validate,
 } from '@angular/forms/signals';
 import type { UpdateProfile } from '@link-sharing/shared-models';
-import {
-  catchError,
-  firstValueFrom,
-  of,
-  throwError,
-} from 'rxjs';
-import { AuthApiService } from '../../api/auth-api.service';
-import { AvatarApiService } from '../../api/avatar-api.service';
-import { LinkApiService } from '../../api/link-api.service';
-import { ProfileApiService } from '../../api/profile-api.service';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { ImageUploadComponent } from '../../atoms/image-upload/image-upload.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import type { PreviewLink } from '../../core/models/preview-link.model';
 import { MainTemplateComponent } from '../../templates/main-template/main-template.component';
+import { ProfileFacadeService } from './_services/profile-facade.service';
 
 interface AccountModel {
   email: string;
@@ -44,6 +34,7 @@ interface AccountModel {
     InputComponent,
     MainTemplateComponent,
   ],
+  providers: [ProfileFacadeService],
   selector: 'app-profile',
   template: `
     <app-main-template
@@ -338,10 +329,7 @@ interface AccountModel {
   `,
 })
 export class ProfileComponent implements OnDestroy {
-  private readonly authApi = inject(AuthApiService);
-  private readonly avatarApi = inject(AvatarApiService);
-  private readonly linkApi = inject(LinkApiService);
-  private readonly profileApi = inject(ProfileApiService);
+  private readonly facade = inject(ProfileFacadeService);
   private readonly profileModel = signal<UpdateProfile>({
     firstName: '',
     lastName: '',
@@ -351,7 +339,6 @@ export class ProfileComponent implements OnDestroy {
   private readonly selectedAvatar = signal<File | null>(null);
   private readonly localAvatarUrl = signal<string | null>(null);
   private readonly hasSubmitted = signal(false);
-  private readonly messageIsError = signal(false);
   private objectUrl: string | null = null;
 
   public readonly profile = this.profileModel.asReadonly();
@@ -380,10 +367,10 @@ export class ProfileComponent implements OnDestroy {
   public readonly accountForm = form(this.accountModel, (path) => {
     disabled(path.email);
   });
-  public readonly isLoading = signal(true);
-  public readonly canRetry = signal(false);
-  public readonly message = signal('');
-  public readonly hasError = this.messageIsError.asReadonly();
+  public readonly isLoading = this.facade.isLoading;
+  public readonly canRetry = this.facade.canRetry;
+  public readonly message = this.facade.message;
+  public readonly hasError = this.facade.hasError;
   public readonly isSubmitting = computed(() =>
     this.profileForm().submitting(),
   );
@@ -420,17 +407,17 @@ export class ProfileComponent implements OnDestroy {
     this.objectUrl = URL.createObjectURL(file);
     this.localAvatarUrl.set(this.objectUrl);
     this.selectedAvatar.set(file);
-    this.clearMessage();
+    this.facade.clearMessage();
   }
 
   public onImageRejected(message: string): void {
-    this.setError(message);
+    this.facade.setUiError(message);
   }
 
   public onSubmit(event: Event): void {
     event.preventDefault();
     this.hasSubmitted.set(true);
-    this.clearMessage();
+    this.facade.clearMessage();
     void this.saveProfile();
   }
 
@@ -439,133 +426,58 @@ export class ProfileComponent implements OnDestroy {
   }
 
   private async loadProfile(): Promise<void> {
-    this.isLoading.set(true);
-    this.canRetry.set(false);
-    this.clearMessage();
+    await this.facade.load();
+    const data = this.facade.data();
 
-    const [accountResult, avatarResult, profileResult, linksResult] =
-      await Promise.allSettled([
-        firstValueFrom(this.authApi.me()),
-        firstValueFrom(
-          this.avatarApi.get().pipe(
-            catchError((error: unknown) =>
-              this.isNotFound(error) ? of(null) : throwError(() => error),
-            ),
-          ),
-        ),
-        firstValueFrom(
-          this.profileApi.get().pipe(
-            catchError((error: unknown) =>
-              this.isNotFound(error) ? of(null) : throwError(() => error),
-            ),
-          ),
-        ),
-        firstValueFrom(this.linkApi.getAll()),
-      ]);
-
-    if (accountResult.status === 'fulfilled') {
-      this.accountModel.set({ email: accountResult.value.email ?? '' });
+    if (data.email !== undefined) {
+      this.accountModel.set({ email: data.email });
     }
 
-    if (avatarResult.status === 'fulfilled') {
-      this.avatarUrl.set(avatarResult.value?.avatarUrl ?? null);
+    if (data.avatarUrl !== undefined) {
+      this.avatarUrl.set(data.avatarUrl);
     }
 
-    if (profileResult.status === 'fulfilled') {
-      if (profileResult.value && !this.profileForm().dirty()) {
+    if (data.profile !== undefined) {
+      if (data.profile && !this.profileForm().dirty()) {
         this.profileModel.set({
-          firstName: profileResult.value.firstName,
-          lastName: profileResult.value.lastName,
+          firstName: data.profile.firstName,
+          lastName: data.profile.lastName,
         });
       }
     }
 
-    if (linksResult.status === 'fulfilled') {
-      this.previewLinks.set(
-        linksResult.value.map((link, index) => ({
-          id: index,
-          platform: link.platform,
-          url: link.url,
-        })),
-      );
+    if (data.previewLinks !== undefined) {
+      this.previewLinks.set(data.previewLinks);
     }
-
-    const hasFailure = [
-      accountResult,
-      avatarResult,
-      profileResult,
-      linksResult,
-    ].some((result) => result.status === 'rejected');
-
-    if (hasFailure) {
-      this.setError('Unable to load your profile. Please try again.');
-      this.canRetry.set(true);
-    }
-
-    this.isLoading.set(false);
   }
 
   private async saveProfile(): Promise<void> {
     await submit(this.profileForm, async (submittedForm) => {
       const value = submittedForm().value();
 
-      try {
-        const savedProfile = await firstValueFrom(
-          this.profileApi.update({
-            firstName: value.firstName,
-            lastName: value.lastName,
-          }),
-        );
+      const result = await this.facade.save(
+        {
+          firstName: value.firstName,
+          lastName: value.lastName,
+        },
+        this.selectedAvatar(),
+      );
 
-        this.profileModel.set({
-          firstName: savedProfile.firstName,
-          lastName: savedProfile.lastName,
-        });
-      } catch {
-        this.setError('Unable to save your profile. Please try again.');
+      if (!result) {
         return;
       }
 
-      const avatar = this.selectedAvatar();
+      this.profileModel.set({
+        firstName: result.profile.firstName,
+        lastName: result.profile.lastName,
+      });
 
-      if (!avatar) {
-        this.setSuccess('Your profile has been saved.');
-        return;
-      }
-
-      try {
-        const savedAvatar = await firstValueFrom(
-          this.avatarApi.upload(avatar),
-        );
-        this.avatarUrl.set(savedAvatar.avatarUrl);
+      if (result.avatarUrl !== undefined) {
+        this.avatarUrl.set(result.avatarUrl);
         this.selectedAvatar.set(null);
         this.revokeObjectUrl();
-        this.setSuccess('Your profile has been saved.');
-      } catch {
-        this.setError(
-          'Your details were saved, but the profile picture was not. Please try again.',
-        );
       }
     });
-  }
-
-  private isNotFound(error: unknown): boolean {
-    return error instanceof HttpErrorResponse && error.status === 404;
-  }
-
-  private clearMessage(): void {
-    this.message.set('');
-    this.messageIsError.set(false);
-  }
-
-  private setError(message: string): void {
-    this.message.set(message);
-    this.messageIsError.set(true);
-  }
-
-  private setSuccess(message: string): void {
-    this.message.set(message);
-    this.messageIsError.set(false);
   }
 
   private revokeObjectUrl(): void {

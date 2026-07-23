@@ -7,19 +7,14 @@ import {
   signal,
 } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import type {
-  Platform,
-  SaveLink,
-  UserLink,
-} from '@link-sharing/shared-models';
-import { firstValueFrom } from 'rxjs';
-import { LinkApiService } from '../../api/link-api.service';
+import type { Platform } from '@link-sharing/shared-models';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import type { PreviewLink } from '../../core/models/preview-link.model';
 import { MainTemplateComponent } from '../../templates/main-template/main-template.component';
 import { EmptyLinksComponent } from './_components/empty-links.component';
 import { LinkEditorCardComponent } from './_components/link-editor-card.component';
 import type { HomeLinkDraft } from './_models/home-link.model';
+import { HomeFacadeService } from './_services/home-facade.service';
 import { isPreviewableLink } from './_utils/is-previewable-link.util';
 
 @Component({
@@ -30,6 +25,7 @@ import { isPreviewableLink } from './_utils/is-previewable-link.util';
     LinkEditorCardComponent,
     MainTemplateComponent,
   ],
+  providers: [HomeFacadeService],
   selector: 'app-home',
   template: `
     <app-main-template [links]="previewLinks()">
@@ -164,16 +160,14 @@ import { isPreviewableLink } from './_utils/is-previewable-link.util';
 })
 export class HomeComponent {
   private readonly injector = inject(Injector);
-  private readonly linkApi = inject(LinkApiService);
-  private readonly savedLinks = signal<readonly UserLink[]>([]);
-  private readonly messageIsError = signal(false);
+  private readonly facade = inject(HomeFacadeService);
   private nextDraftId = 1;
 
   public readonly drafts = signal<readonly HomeLinkDraft[]>([]);
-  public readonly isLoading = signal(true);
-  public readonly isSaving = signal(false);
-  public readonly message = signal('');
-  public readonly hasError = this.messageIsError.asReadonly();
+  public readonly isLoading = this.facade.isLoading;
+  public readonly isSaving = this.facade.isSaving;
+  public readonly message = this.facade.message;
+  public readonly hasError = this.facade.hasError;
   public readonly previewLinks = computed<readonly PreviewLink[]>(() =>
     this.drafts().flatMap<PreviewLink>((draft) => {
       const platform = draft.platform();
@@ -188,7 +182,7 @@ export class HomeComponent {
   );
   public readonly hasChanges = computed(() => {
     const drafts = this.drafts();
-    const savedLinks = this.savedLinks();
+    const savedLinks = this.facade.savedLinks();
 
     if (drafts.length !== savedLinks.length) {
       return true;
@@ -210,7 +204,7 @@ export class HomeComponent {
   }
 
   public addLink(): void {
-    this.clearMessage();
+    this.facade.clearMessage();
     this.drafts.update((drafts) => [
       ...drafts,
       this.createDraft(null, null, ''),
@@ -218,7 +212,7 @@ export class HomeComponent {
   }
 
   public removeLink(id: number): void {
-    this.clearMessage();
+    this.facade.clearMessage();
     this.drafts.update((drafts) => drafts.filter((draft) => draft.id !== id));
   }
 
@@ -227,21 +221,14 @@ export class HomeComponent {
   }
 
   private async loadLinks(): Promise<void> {
-    this.isLoading.set(true);
-    this.clearMessage();
+    const links = await this.facade.loadLinks();
 
-    try {
-      const links = await firstValueFrom(this.linkApi.getAll());
-      this.savedLinks.set(links);
+    if (links) {
       this.drafts.set(
         links.map((link) =>
           this.createDraft(link.id, link.platform, link.url),
         ),
       );
-    } catch {
-      this.setError('Unable to load your links. Please refresh and try again.');
-    } finally {
-      this.isLoading.set(false);
     }
   }
 
@@ -258,57 +245,26 @@ export class HomeComponent {
         ({ platform, url }) => !isPreviewableLink(platform, url),
       )
     ) {
-      this.setError(
+      this.facade.setValidationError(
         'Choose a platform and enter a matching HTTPS URL for every link.',
       );
       return;
     }
 
-    this.isSaving.set(true);
-    this.clearMessage();
+    const savedLinks = await this.facade.saveLinks(
+      entries.map(({ draft, platform, url }) => ({
+        serverId: draft.serverId,
+        platform: platform as Platform,
+        url,
+      })),
+    );
 
-    try {
-      const activeServerIds = new Set(
-        entries.flatMap(({ draft }) =>
-          draft.serverId ? [draft.serverId] : [],
-        ),
-      );
-      const removedLinks = this.savedLinks().filter(
-        (link) => !activeServerIds.has(link.id),
-      );
-
-      await Promise.all(
-        removedLinks.map((link) =>
-          firstValueFrom(this.linkApi.remove(link.id)),
-        ),
-      );
-
-      const saved = await Promise.all(
-        entries.map(({ draft, platform, url }) => {
-          const link: SaveLink = {
-            platform: platform as Platform,
-            url,
-          };
-
-          return firstValueFrom(
-            draft.serverId
-              ? this.linkApi.update(draft.serverId, link)
-              : this.linkApi.create(link),
-          );
-        }),
-      );
-
-      this.savedLinks.set(saved);
+    if (savedLinks) {
       this.drafts.set(
-        saved.map((link) =>
+        savedLinks.map((link) =>
           this.createDraft(link.id, link.platform, link.url),
         ),
       );
-      this.setSuccess('Your links have been saved.');
-    } catch {
-      this.setError('Unable to save your links. Please try again.');
-    } finally {
-      this.isSaving.set(false);
     }
   }
 
@@ -325,20 +281,5 @@ export class HomeComponent {
       platform: signal(platform),
       urlForm: form(urlModel, { injector: this.injector }),
     };
-  }
-
-  private clearMessage(): void {
-    this.message.set('');
-    this.messageIsError.set(false);
-  }
-
-  private setError(message: string): void {
-    this.message.set(message);
-    this.messageIsError.set(true);
-  }
-
-  private setSuccess(message: string): void {
-    this.message.set(message);
-    this.messageIsError.set(false);
   }
 }

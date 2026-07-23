@@ -17,10 +17,7 @@ import { AvatarResponseDto } from './dto/avatar-response.dto';
 export class AvatarService {
   constructor(private readonly avatars: AvatarRepository) {}
 
-  async upload(
-    userId: string,
-    file: AvatarFile,
-  ): Promise<AvatarResponseDto> {
+  async upload(userId: string, file: AvatarFile): Promise<AvatarResponseDto> {
     const path = this.getPath(userId);
     await this.callStorage(() => this.avatars.upload(path, file));
 

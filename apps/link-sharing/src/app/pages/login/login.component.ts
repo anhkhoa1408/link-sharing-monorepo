@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,16 +14,16 @@ import {
   submit,
 } from '@angular/forms/signals';
 import type { AuthCredentials } from '@link-sharing/shared-models';
-import { firstValueFrom } from 'rxjs';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { InputComponent } from '../../atoms/input/input.component';
-import { AuthApiService } from '../../api/auth-api.service';
 import { AuthService } from '../../core/auth.service';
 import { AuthTemplateComponent } from '../../templates/auth-template/auth-template.component';
+import { LoginFacadeService } from './_services/login-facade.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AuthTemplateComponent, ButtonComponent, InputComponent, RouterLink],
+  providers: [LoginFacadeService],
   selector: 'app-login',
   styles: `
     :host {
@@ -155,8 +154,8 @@ import { AuthTemplateComponent } from '../../templates/auth-template/auth-templa
 export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly authApi = inject(AuthApiService);
   private readonly auth = inject(AuthService);
+  private readonly facade = inject(LoginFacadeService);
   private readonly credentials = signal<AuthCredentials>({
     email: '',
     password: '',
@@ -171,7 +170,7 @@ export class LoginComponent {
       message: 'Password must be at least 8 characters',
     });
   });
-  public readonly errorMessage = signal('');
+  public readonly errorMessage = this.facade.errorMessage;
   public readonly isSubmitting = computed(() => this.loginForm().submitting());
   public readonly showEmailError = computed(
     () =>
@@ -197,7 +196,7 @@ export class LoginComponent {
   public onSubmit(event: Event): void {
     event.preventDefault();
     this.hasSubmitted.set(true);
-    this.errorMessage.set('');
+    this.facade.clearError();
     void this.submitLogin();
   }
 
@@ -230,7 +229,7 @@ export class LoginComponent {
       !hasValidCallbackExpiry ||
       !this.auth.saveAccessToken(accessToken)
     ) {
-      this.errorMessage.set(
+      this.facade.setError(
         'The sign-up link is invalid or has expired. Please try again.',
       );
       return;
@@ -241,22 +240,10 @@ export class LoginComponent {
 
   private async submitLogin(): Promise<void> {
     await submit(this.loginForm, async (submittedForm) => {
-      try {
-        const session = await firstValueFrom(
-          this.authApi.login(submittedForm().value()),
-        );
+      const loggedIn = await this.facade.login(submittedForm().value());
 
-        if (!this.auth.save(session)) {
-          throw new Error('The API returned an expired access token.');
-        }
-
+      if (loggedIn) {
         await this.router.navigateByUrl('/home', { replaceUrl: true });
-      } catch (error: unknown) {
-        this.errorMessage.set(
-          error instanceof HttpErrorResponse && error.status === 401
-            ? 'Invalid email or password'
-            : 'Unable to log in. Please try again.',
-        );
       }
     });
   }

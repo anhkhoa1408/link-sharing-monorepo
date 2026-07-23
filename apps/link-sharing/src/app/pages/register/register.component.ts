@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,11 +14,10 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { AuthApiService } from '../../api/auth-api.service';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { AuthTemplateComponent } from '../../templates/auth-template/auth-template.component';
+import { RegisterFacadeService } from './_services/register-facade.service';
 
 interface RegisterFormModel {
   email: string;
@@ -30,6 +28,7 @@ interface RegisterFormModel {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AuthTemplateComponent, ButtonComponent, InputComponent, RouterLink],
+  providers: [RegisterFacadeService],
   selector: 'app-register',
   styles: `
     :host {
@@ -177,7 +176,7 @@ interface RegisterFormModel {
   `,
 })
 export class RegisterComponent {
-  private readonly authApi = inject(AuthApiService);
+  private readonly facade = inject(RegisterFacadeService);
   private readonly model = signal<RegisterFormModel>({
     email: '',
     password: '',
@@ -199,8 +198,8 @@ export class RegisterComponent {
         : undefined,
     );
   });
-  public readonly errorMessage = signal('');
-  public readonly isRegistered = signal(false);
+  public readonly errorMessage = this.facade.errorMessage;
+  public readonly isRegistered = this.facade.isRegistered;
   public readonly isSubmitting = computed(() =>
     this.registerForm().submitting(),
   );
@@ -232,7 +231,7 @@ export class RegisterComponent {
   public onSubmit(event: Event): void {
     event.preventDefault();
     this.hasSubmitted.set(true);
-    this.errorMessage.set('');
+    this.facade.clearError();
     void this.submitRegistration();
   }
 
@@ -240,16 +239,7 @@ export class RegisterComponent {
     await submit(this.registerForm, async (submittedForm) => {
       const { email, password } = submittedForm().value();
 
-      try {
-        await firstValueFrom(this.authApi.register({ email, password }));
-        this.isRegistered.set(true);
-      } catch (error: unknown) {
-        this.errorMessage.set(
-          error instanceof HttpErrorResponse && error.status === 400
-            ? 'Unable to create account.'
-            : 'Unable to register. Please try again.',
-        );
-      }
+      await this.facade.register({ email, password });
     });
   }
 }

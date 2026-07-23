@@ -6,9 +6,58 @@ Nx monorepo containing blank Angular frontend and NestJS API.
 
 - `apps/link-sharing`: Angular standalone app with routing
 - `apps/api`: NestJS REST API
+- `libs/shared-models`: shared frontend/backend TypeScript contracts
 - Prisma: Supabase PostgreSQL data access
 - Supabase SDK: Auth and Storage
 - Redis: Nest cache, local Docker or managed Redis
+
+## Project architecture
+
+```text
+link-sharing/
+├── apps/
+│   ├── link-sharing/              # Angular frontend
+│   │   ├── public/                # Static public files
+│   │   └── src/
+│   │       ├── app/
+│   │       │   ├── api/           # Backend API clients
+│   │       │   ├── atoms/         # Small reusable UI components
+│   │       │   ├── molecules/     # Compositions of atoms
+│   │       │   ├── organisms/     # Feature-level UI sections
+│   │       │   ├── templates/     # Shared page layouts
+│   │       │   ├── pages/         # Route-level features
+│   │       │   └── core/          # App-wide services, guards, interceptors,
+│   │       │                       # models, constants, and utilities
+│   │       ├── assets/            # SCSS and design tokens
+│   │       └── environments/      # Angular environment configuration
+│   └── api/                       # NestJS REST API
+│       ├── prisma/
+│       │   ├── schema.prisma      # Product-domain database schema
+│       │   └── migrations/        # Prisma migrations
+│       └── src/
+│           ├── app/
+│           │   ├── auth/          # Authentication
+│           │   ├── avatar/        # Avatar upload and storage
+│           │   ├── link/          # Link management and public links
+│           │   ├── profile/       # User and public profile features
+│           │   ├── cache/         # Nest cache abstraction
+│           │   ├── prisma/        # Prisma integration
+│           │   ├── supabase/      # Supabase integration
+│           │   ├── config/        # Environment validation
+│           │   └── health/        # Health endpoint
+│           └── generated/prisma/  # Generated Prisma client; do not edit
+├── libs/
+│   └── shared-models/             # Contracts shared by both applications
+├── rules/                         # Repository coding conventions
+├── tools/                         # Workspace automation
+├── nx.json                        # Nx workspace configuration
+└── package.json                   # Dependencies and npm scripts
+```
+
+The frontend follows Atomic Design for reusable UI and keeps route-specific
+code under `pages`. The API is organized by NestJS feature modules; database
+access stays in repositories through `PrismaService`. Cross-application
+contracts are exported from `libs/shared-models`.
 
 ## Local setup
 

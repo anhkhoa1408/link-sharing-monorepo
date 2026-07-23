@@ -1,1 +1,2 @@
+export const SUPABASE_AUTH_CLIENT = Symbol('SUPABASE_AUTH_CLIENT');
 export const SUPABASE_CLIENT = Symbol('SUPABASE_CLIENT');

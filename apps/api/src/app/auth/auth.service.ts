@@ -70,7 +70,7 @@ export class AuthService {
 
   async getById(userId: string): Promise<User> {
     const { data, error } = await callAuthProvider(() =>
-      this.supabase.auth.admin.getUserById(userId),
+      this.supabase.authAdmin.getUserById(userId),
     );
     assertAuthProviderAvailable(error);
 

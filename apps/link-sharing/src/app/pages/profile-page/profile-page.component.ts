@@ -1,25 +1,20 @@
 import { DOCUMENT } from '@angular/common';
-import { httpResource } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
-  effect,
   inject,
   type OnDestroy,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
-import type { ProfilePage } from '@link-sharing/shared-models';
-import { ProfilePageApiService } from '../../api/profile-page-api.service';
+import { Router } from '@angular/router';
 import { ButtonComponent } from '../../atoms/button/button.component';
-import { AuthService } from '../../core/auth.service';
 import { PreviewTagComponent } from '../../molecules/preview-tag/preview-tag.component';
+import { ProfilePageFacadeService } from './_services/profile-page-facade.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonComponent, PreviewTagComponent],
+  providers: [ProfilePageFacadeService],
   selector: 'app-profile-page',
   template: `
     <div class="profile-page">
@@ -395,56 +390,16 @@ import { PreviewTagComponent } from '../../molecules/preview-tag/preview-tag.com
   `,
 })
 export class ProfilePageComponent implements OnDestroy {
-  private readonly api = inject(ProfilePageApiService);
-  private readonly auth = inject(AuthService);
   private readonly document = inject(DOCUMENT);
-  private readonly route = inject(ActivatedRoute);
+  private readonly facade = inject(ProfilePageFacadeService);
   private readonly router = inject(Router);
   private clipboardTimer: ReturnType<typeof setTimeout> | null = null;
 
-  private readonly routeData = toSignal(this.route.data, {
-    initialValue: this.route.snapshot.data,
-  });
-  private readonly routeParams = toSignal(this.route.paramMap, {
-    initialValue: this.route.snapshot.paramMap,
-  });
-
-  protected readonly isOwnerPreview = computed(
-    () => this.routeData()['ownerPreview'] === true,
-  );
-  private readonly requestUrl = computed(() => {
-    if (this.isOwnerPreview()) {
-      return this.api.currentUrl();
-    }
-
-    const userId = this.routeParams().get('userId');
-
-    return userId ? this.api.publicUrl(userId) : undefined;
-  });
-
-  protected readonly profilePage = httpResource<ProfilePage>(
-    () => this.requestUrl(),
-    { debugName: 'profile-page' },
-  );
-  protected readonly isPublicNotFound = computed(
-    () =>
-      !this.isOwnerPreview() &&
-      [400, 404].includes(this.profilePage.statusCode() ?? 0),
-  );
+  protected readonly isOwnerPreview = this.facade.isOwnerPreview;
+  protected readonly profilePage = this.facade.profilePage;
+  protected readonly isPublicNotFound = this.facade.isPublicNotFound;
   protected readonly clipboardMessage = signal('');
   protected readonly clipboardFailed = signal(false);
-
-  public constructor() {
-    effect(() => {
-      if (
-        this.isOwnerPreview() &&
-        this.profilePage.statusCode() === 401
-      ) {
-        this.auth.logout();
-        void this.router.navigateByUrl('/login', { replaceUrl: true });
-      }
-    });
-  }
 
   public ngOnDestroy(): void {
     if (this.clipboardTimer) {
@@ -461,7 +416,7 @@ export class ProfilePageComponent implements OnDestroy {
   }
 
   protected onRetry(): void {
-    this.profilePage.reload();
+    this.facade.reload();
   }
 
   protected async onShareLink(): Promise<void> {
