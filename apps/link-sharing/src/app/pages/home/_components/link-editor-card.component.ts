@@ -4,6 +4,7 @@ import {
   computed,
   input,
   model,
+  output,
 } from '@angular/core';
 import type { Field } from '@angular/forms/signals';
 import type { Platform } from '@link-sharing/shared-models';
@@ -24,7 +25,13 @@ import { PlatformSelectComponent } from '../../../organisms/platform-select/plat
           </span>
           Link #{{ index() }}
         </h2>
-        <button class="link-card__remove" type="button">Remove</button>
+        <button
+          class="link-card__remove"
+          type="button"
+          (click)="removed.emit()"
+        >
+          Remove
+        </button>
       </header>
 
       <div class="link-card__field">
@@ -143,6 +150,7 @@ export class LinkEditorCardComponent {
   public readonly index = input.required<number>();
   public readonly platform = model.required<Platform | null>();
   public readonly urlField = input.required<Field<string>>();
+  public readonly removed = output<void>();
 
   protected readonly platformLabelId = computed(
     () => `home-link-${this.index()}-platform-label`,

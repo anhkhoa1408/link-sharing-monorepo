@@ -8,8 +8,27 @@ import {
 import { Router } from '@angular/router';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { AuthService } from '../../core/auth.service';
+import type { PreviewLink } from '../../core/models/preview-link.model';
 import { TabButtonComponent } from '../../molecules/tab-button/tab-button.component';
 import { PhonePreviewComponent } from '../../organisms/phone-preview/phone-preview.component';
+
+const DEFAULT_PREVIEW_LINKS: readonly PreviewLink[] = [
+  {
+    id: 1,
+    platform: 'GITHUB',
+    url: 'https://github.com/johnappleseed',
+  },
+  {
+    id: 2,
+    platform: 'YOUTUBE',
+    url: 'https://youtube.com/benwright',
+  },
+  {
+    id: 3,
+    platform: 'LINKEDIN',
+    url: 'https://linkedin.com/in/johnappleseed',
+  },
+];
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,10 +52,7 @@ import { PhonePreviewComponent } from '../../organisms/phone-preview/phone-previ
           />
         </div>
 
-        <nav
-          aria-label="Main navigation"
-          class="main-template__navigation"
-        >
+        <nav aria-label="Main navigation" class="main-template__navigation">
           <app-tab-button icon="link" label="Links" route="/home" />
           <app-tab-button
             icon="profile"
@@ -53,10 +69,7 @@ import { PhonePreviewComponent } from '../../organisms/phone-preview/phone-previ
           >
             Logout
           </app-button>
-          <app-button
-            class="main-template__header-action"
-            variant="secondary"
-          >
+          <app-button class="main-template__header-action" variant="secondary">
             Preview
           </app-button>
         </div>
@@ -69,6 +82,7 @@ import { PhonePreviewComponent } from '../../organisms/phone-preview/phone-previ
             [email]="email()"
             [firstName]="firstName()"
             [lastName]="lastName()"
+            [links]="links()"
           />
         </aside>
 
@@ -252,6 +266,7 @@ export class MainTemplateComponent {
   public readonly lastName = input<string | null>(null);
   public readonly email = input<string | null>(null);
   public readonly avatarUrl = input<string | null>(null);
+  public readonly links = input<readonly PreviewLink[]>(DEFAULT_PREVIEW_LINKS);
 
   protected onLogout(): void {
     this.auth.logout();

@@ -4,6 +4,7 @@ import {
   computed,
   input,
 } from '@angular/core';
+import type { PreviewLink } from '../../core/models/preview-link.model';
 import { PreviewTagComponent } from '../../molecules/preview-tag/preview-tag.component';
 
 @Component({
@@ -32,35 +33,21 @@ import { PreviewTagComponent } from '../../molecules/preview-tag/preview-tag.com
             @if (email(); as profileEmail) {
               <p class="phone-preview__email">{{ profileEmail }}</p>
             } @else {
-              <div
-                aria-hidden="true"
-                class="phone-preview__description"
-              ></div>
+              <div aria-hidden="true" class="phone-preview__description"></div>
             }
           </div>
         </div>
 
         <div class="phone-preview__links">
-          <div class="phone-preview__tag">
-            <app-preview-tag
-              platform="GITHUB"
-              url="https://github.com/johnappleseed"
-            />
-          </div>
-          <div class="phone-preview__tag">
-            <app-preview-tag
-              platform="YOUTUBE"
-              url="https://youtube.com/benwright"
-            />
-          </div>
-          <div class="phone-preview__tag">
-            <app-preview-tag
-              platform="LINKEDIN"
-              url="https://linkedin.com/in/johnappleseed"
-            />
-          </div>
-          <div aria-hidden="true" class="phone-preview__placeholder"></div>
-          <div aria-hidden="true" class="phone-preview__placeholder"></div>
+          @for (link of links(); track link.id) {
+            <div class="phone-preview__tag">
+              <app-preview-tag [platform]="link.platform" [url]="link.url" />
+            </div>
+          }
+
+          @for (slot of placeholderSlots(); track slot) {
+            <div aria-hidden="true" class="phone-preview__placeholder"></div>
+          }
         </div>
       </div>
     </section>
@@ -215,6 +202,7 @@ export class PhonePreviewComponent {
   public readonly lastName = input<string | null>(null);
   public readonly email = input<string | null>(null);
   public readonly avatarUrl = input<string | null>(null);
+  public readonly links = input<readonly PreviewLink[]>([]);
 
   protected readonly fullName = computed(() => {
     const name = [this.firstName(), this.lastName()]
@@ -223,4 +211,10 @@ export class PhonePreviewComponent {
 
     return name || null;
   });
+  protected readonly placeholderSlots = computed(() =>
+    Array.from(
+      { length: Math.max(0, 5 - this.links().length) },
+      (_, index) => index,
+    ),
+  );
 }
