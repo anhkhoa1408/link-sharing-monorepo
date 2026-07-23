@@ -3,8 +3,8 @@ import {
   Component,
   computed,
   input,
-  output,
 } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 export type TabButtonIcon = 'link' | 'profile';
 
@@ -26,14 +26,15 @@ const TAB_BUTTON_ICONS = {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, RouterLinkActive],
   selector: 'app-tab-button',
   template: `
-    <button
+    <a
+      #activeRoute="routerLinkActive"
       class="tab-button"
-      type="button"
-      [attr.aria-pressed]="active()"
-      [class.tab-button--active]="active()"
-      (click)="pressed.emit()"
+      routerLinkActive="tab-button--active"
+      [attr.aria-current]="activeRoute.isActive ? 'page' : null"
+      [routerLink]="route()"
     >
       <svg
         aria-hidden="true"
@@ -43,7 +44,7 @@ const TAB_BUTTON_ICONS = {
         <path [attr.d]="iconDefinition().path" fill="currentColor" />
       </svg>
       <span class="tab-button__label">{{ label() }}</span>
-    </button>
+    </a>
   `,
   styles: `
     .tab-button {
@@ -61,6 +62,7 @@ const TAB_BUTTON_ICONS = {
       font-weight: var(--font-weight-semibold);
       line-height: var(--line-height-150);
       letter-spacing: 0;
+      text-decoration: none;
       white-space: nowrap;
 
       &:hover,
@@ -106,8 +108,7 @@ const TAB_BUTTON_ICONS = {
 export class TabButtonComponent {
   public readonly label = input.required<string>();
   public readonly icon = input.required<TabButtonIcon>();
-  public readonly active = input(false);
-  public readonly pressed = output<void>();
+  public readonly route = input.required<string>();
 
   protected readonly iconDefinition = computed<TabButtonIconDefinition>(
     () => TAB_BUTTON_ICONS[this.icon()],

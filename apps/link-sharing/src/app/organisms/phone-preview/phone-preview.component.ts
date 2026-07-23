@@ -1,5 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PreviewTagComponent } from '../../../molecules/preview-tag/preview-tag.component';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from '@angular/core';
+import { PreviewTagComponent } from '../../molecules/preview-tag/preview-tag.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -11,10 +16,27 @@ import { PreviewTagComponent } from '../../../molecules/preview-tag/preview-tag.
 
       <div class="phone-preview__content">
         <div class="phone-preview__profile">
-          <div aria-hidden="true" class="phone-preview__avatar"></div>
+          @if (avatarUrl(); as avatar) {
+            <img alt="" class="phone-preview__avatar-image" [src]="avatar" />
+          } @else {
+            <div aria-hidden="true" class="phone-preview__avatar"></div>
+          }
+
           <div class="phone-preview__identity">
-            <div aria-hidden="true" class="phone-preview__name"></div>
-            <div aria-hidden="true" class="phone-preview__description"></div>
+            @if (fullName(); as name) {
+              <p class="phone-preview__name-text">{{ name }}</p>
+            } @else {
+              <div aria-hidden="true" class="phone-preview__name"></div>
+            }
+
+            @if (email(); as profileEmail) {
+              <p class="phone-preview__email">{{ profileEmail }}</p>
+            } @else {
+              <div
+                aria-hidden="true"
+                class="phone-preview__description"
+              ></div>
+            }
           </div>
         </div>
 
@@ -97,15 +119,25 @@ import { PreviewTagComponent } from '../../../molecules/preview-tag/preview-tag.
         gap: 25px;
       }
 
-      &__avatar {
+      &__avatar,
+      &__avatar-image {
         width: 96px;
         height: 96px;
         border-radius: 50%;
+      }
+
+      &__avatar {
         background: var(--color-grey-100);
+      }
+
+      &__avatar-image {
+        border: 4px solid var(--color-purple-600);
+        object-fit: cover;
       }
 
       &__identity {
         display: flex;
+        max-width: 100%;
         flex-direction: column;
         align-items: center;
         gap: 13px;
@@ -126,6 +158,30 @@ import { PreviewTagComponent } from '../../../molecules/preview-tag/preview-tag.
       &__description {
         width: 72px;
         height: 8px;
+      }
+
+      &__name-text,
+      &__email {
+        max-width: 100%;
+        margin: 0;
+        overflow: hidden;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      &__name-text {
+        color: var(--color-grey-900);
+        font-size: var(--font-size-16);
+        font-weight: var(--font-weight-semibold);
+        line-height: var(--line-height-150);
+      }
+
+      &__email {
+        color: var(--color-grey-500);
+        font-size: var(--font-size-12);
+        font-weight: var(--font-weight-regular);
+        line-height: var(--line-height-150);
       }
 
       &__links {
@@ -154,4 +210,17 @@ import { PreviewTagComponent } from '../../../molecules/preview-tag/preview-tag.
     }
   `,
 })
-export class PhonePreviewComponent {}
+export class PhonePreviewComponent {
+  public readonly firstName = input<string | null>(null);
+  public readonly lastName = input<string | null>(null);
+  public readonly email = input<string | null>(null);
+  public readonly avatarUrl = input<string | null>(null);
+
+  protected readonly fullName = computed(() => {
+    const name = [this.firstName(), this.lastName()]
+      .filter((part): part is string => Boolean(part?.trim()))
+      .join(' ');
+
+    return name || null;
+  });
+}
