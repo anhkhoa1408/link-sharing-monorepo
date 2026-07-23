@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { StorageApiError } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase/supabase.service';
 import { AVATAR_SIGNED_URL_TTL_SECONDS } from './constants/avatar.constants';
 import { AvatarStorageError } from './errors/avatar.errors';
@@ -7,6 +8,7 @@ import { AvatarFile } from './types/avatar.types';
 
 @Injectable()
 export class AvatarRepository {
+  private readonly logger = new Logger(AvatarRepository.name);
   private readonly bucket: string;
 
   constructor(
@@ -24,9 +26,10 @@ export class AvatarRepository {
           cacheControl: String(AVATAR_SIGNED_URL_TTL_SECONDS),
           contentType: file.mimetype,
           upsert: true,
-        });
+      });
 
       if (error) {
+        this.logStorageError('upload', error);
         throw new AvatarStorageError();
       }
     } catch (error) {
@@ -36,25 +39,16 @@ export class AvatarRepository {
 
   async createSignedUrl(path: string): Promise<string | null> {
     try {
-      const bucket = this.supabase.storage.from(this.bucket);
-      const { data: exists } = await bucket.exists(path);
-
-      if (!exists) {
-        const { error } = await this.supabase.storage.getBucket(this.bucket);
-
-        if (error) {
-          throw new AvatarStorageError();
-        }
-
-        return null;
-      }
-
-      const { data, error } = await bucket.createSignedUrl(
-        path,
-        AVATAR_SIGNED_URL_TTL_SECONDS,
-      );
+      const { data, error } = await this.supabase.storage
+        .from(this.bucket)
+        .createSignedUrl(path, AVATAR_SIGNED_URL_TTL_SECONDS);
 
       if (error) {
+        if (error instanceof StorageApiError && error.statusCode === '404') {
+          return null;
+        }
+
+        this.logStorageError('create signed URL', error);
         throw new AvatarStorageError();
       }
 
@@ -69,6 +63,21 @@ export class AvatarRepository {
       throw error;
     }
 
+    this.logger.error(`Avatar storage request failed: ${String(error)}`);
     throw new AvatarStorageError();
+  }
+
+  private logStorageError(
+    operation: string,
+    error: {
+      message: string;
+      status?: number;
+      statusCode?: string;
+    },
+  ): void {
+    this.logger.error(
+      `Avatar ${operation} failed: ${error.message} ` +
+        `(status=${error.status}, code=${error.statusCode})`,
+    );
   }
 }

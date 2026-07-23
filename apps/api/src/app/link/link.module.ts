@@ -7,5 +7,6 @@ import { PublicLinkController } from './public-link.controller';
 @Module({
   controllers: [LinkController, PublicLinkController],
   providers: [LinkService, LinkRepository],
+  exports: [LinkService],
 })
 export class LinkModule {}

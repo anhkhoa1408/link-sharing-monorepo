@@ -32,5 +32,22 @@ export const appRoutes: Route[] = [
         (module) => module.ProfileComponent,
       ),
   },
+  {
+    path: 'preview',
+    canActivate: [authGuard],
+    data: { ownerPreview: true },
+    loadComponent: () =>
+      import('./pages/profile-page/profile-page.component').then(
+        (module) => module.ProfilePageComponent,
+      ),
+  },
+  {
+    path: 'share/:userId',
+    data: { ownerPreview: false },
+    loadComponent: () =>
+      import('./pages/profile-page/profile-page.component').then(
+        (module) => module.ProfilePageComponent,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 ];

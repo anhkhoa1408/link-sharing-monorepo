@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '@supabase/supabase-js';
@@ -62,6 +63,19 @@ export class AuthService {
 
     if (error || !data.user) {
       throw new UnauthorizedException('Invalid or expired access token');
+    }
+
+    return data.user;
+  }
+
+  async getById(userId: string): Promise<User> {
+    const { data, error } = await callAuthProvider(() =>
+      this.supabase.auth.admin.getUserById(userId),
+    );
+    assertAuthProviderAvailable(error);
+
+    if (error || !data.user) {
+      throw new NotFoundException('User not found');
     }
 
     return data.user;

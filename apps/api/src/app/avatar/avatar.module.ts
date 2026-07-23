@@ -6,5 +6,6 @@ import { AvatarService } from './avatar.service';
 @Module({
   controllers: [AvatarController],
   providers: [AvatarService, AvatarRepository],
+  exports: [AvatarService],
 })
 export class AvatarModule {}

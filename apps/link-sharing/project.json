@@ -56,9 +56,6 @@
       "executor": "@angular/build:dev-server",
       "dependsOn": ["api:serve"],
       "defaultConfiguration": "development",
-      "options": {
-        "proxyConfig": "apps/link-sharing/proxy.conf.json"
-      },
       "configurations": {
         "production": {
           "buildTarget": "link-sharing:build:production"

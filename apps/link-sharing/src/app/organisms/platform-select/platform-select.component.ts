@@ -204,9 +204,7 @@ const PLATFORM_OPTIONS: readonly PlatformOption[] = PLATFORM_VALUES.map(
     }
 
     .platform-select-panel.mat-mdc-select-panel {
-      display: flex;
-      max-height: min(798px, calc(100vh - 32px));
-      flex-direction: column;
+      max-height: min(400px, calc(100dvh - 32px));
       padding: var(--spacing-200);
       overflow-y: auto;
       border: 1px solid var(--color-grey-200);
@@ -225,6 +223,7 @@ const PLATFORM_OPTIONS: readonly PlatformOption[] = PLATFORM_VALUES.map(
         line-height: var(--line-height-150);
 
         &:not(:last-child) {
+          min-height: calc(24px + var(--spacing-200) + 1px);
           padding-bottom: var(--spacing-200);
           margin-bottom: var(--spacing-200);
           border-bottom: 1px solid var(--color-grey-200);

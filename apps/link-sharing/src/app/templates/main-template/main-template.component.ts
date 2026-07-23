@@ -69,7 +69,11 @@ const DEFAULT_PREVIEW_LINKS: readonly PreviewLink[] = [
           >
             Logout
           </app-button>
-          <app-button class="main-template__header-action" variant="secondary">
+          <app-button
+            class="main-template__header-action"
+            variant="secondary"
+            (click)="onPreview()"
+          >
             Preview
           </app-button>
         </div>
@@ -282,5 +286,9 @@ export class MainTemplateComponent {
   protected onLogout(): void {
     this.auth.logout();
     void this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
+
+  protected onPreview(): void {
+    void this.router.navigateByUrl('/preview');
   }
 }

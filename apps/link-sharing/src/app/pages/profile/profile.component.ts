@@ -24,10 +24,12 @@ import {
 } from 'rxjs';
 import { AuthApiService } from '../../api/auth-api.service';
 import { AvatarApiService } from '../../api/avatar-api.service';
+import { LinkApiService } from '../../api/link-api.service';
 import { ProfileApiService } from '../../api/profile-api.service';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { ImageUploadComponent } from '../../atoms/image-upload/image-upload.component';
 import { InputComponent } from '../../atoms/input/input.component';
+import type { PreviewLink } from '../../core/models/preview-link.model';
 import { MainTemplateComponent } from '../../templates/main-template/main-template.component';
 
 interface AccountModel {
@@ -49,6 +51,7 @@ interface AccountModel {
       [email]="account().email || null"
       [firstName]="profile().firstName || null"
       [lastName]="profile().lastName || null"
+      [links]="previewLinks()"
     >
       <div class="profile-page">
         <header class="profile-page__intro">
@@ -337,6 +340,7 @@ interface AccountModel {
 export class ProfileComponent implements OnDestroy {
   private readonly authApi = inject(AuthApiService);
   private readonly avatarApi = inject(AvatarApiService);
+  private readonly linkApi = inject(LinkApiService);
   private readonly profileApi = inject(ProfileApiService);
   private readonly profileModel = signal<UpdateProfile>({
     firstName: '',
@@ -352,6 +356,7 @@ export class ProfileComponent implements OnDestroy {
 
   public readonly profile = this.profileModel.asReadonly();
   public readonly account = this.accountModel.asReadonly();
+  public readonly previewLinks = signal<readonly PreviewLink[]>([]);
   public readonly profileForm = form(this.profileModel, (path) => {
     required(path.firstName, { message: 'First name is required' });
     validate(path.firstName, ({ value }) =>
@@ -438,7 +443,7 @@ export class ProfileComponent implements OnDestroy {
     this.canRetry.set(false);
     this.clearMessage();
 
-    const [accountResult, avatarResult, profileResult] =
+    const [accountResult, avatarResult, profileResult, linksResult] =
       await Promise.allSettled([
         firstValueFrom(this.authApi.me()),
         firstValueFrom(
@@ -455,6 +460,7 @@ export class ProfileComponent implements OnDestroy {
             ),
           ),
         ),
+        firstValueFrom(this.linkApi.getAll()),
       ]);
 
     if (accountResult.status === 'fulfilled') {
@@ -474,9 +480,22 @@ export class ProfileComponent implements OnDestroy {
       }
     }
 
-    const hasFailure = [accountResult, avatarResult, profileResult].some(
-      (result) => result.status === 'rejected',
-    );
+    if (linksResult.status === 'fulfilled') {
+      this.previewLinks.set(
+        linksResult.value.map((link, index) => ({
+          id: index,
+          platform: link.platform,
+          url: link.url,
+        })),
+      );
+    }
+
+    const hasFailure = [
+      accountResult,
+      avatarResult,
+      profileResult,
+      linksResult,
+    ].some((result) => result.status === 'rejected');
 
     if (hasFailure) {
       this.setError('Unable to load your profile. Please try again.');

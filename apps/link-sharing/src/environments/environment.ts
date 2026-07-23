@@ -1,3 +1,3 @@
 export const environment = {
-  baseApi: '/api',
+  baseApi: 'http://localhost:3333/api',
 } as const;

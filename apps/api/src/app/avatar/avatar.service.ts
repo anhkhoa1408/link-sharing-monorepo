@@ -37,13 +37,23 @@ export class AvatarService {
   }
 
   async get(userId: string): Promise<AvatarResponseDto> {
+    const avatar = await this.getOptional(userId);
+
+    if (!avatar) {
+      throw new NotFoundException(AVATAR_NOT_FOUND);
+    }
+
+    return avatar;
+  }
+
+  async getOptional(userId: string): Promise<AvatarResponseDto | null> {
     const expiresAt = this.getExpiresAt();
     const avatarUrl = await this.callStorage(() =>
       this.avatars.createSignedUrl(this.getPath(userId)),
     );
 
     if (!avatarUrl) {
-      throw new NotFoundException(AVATAR_NOT_FOUND);
+      return null;
     }
 
     return this.createResponse(avatarUrl, expiresAt);

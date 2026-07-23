@@ -16,3 +16,14 @@ export const PLATFORM_VALUES = [
 ] as const;
 
 export type Platform = (typeof PLATFORM_VALUES)[number];
+
+export interface UserLink {
+  readonly id: string;
+  readonly platform: Platform;
+  readonly url: string;
+}
+
+export interface SaveLink {
+  readonly platform: Platform;
+  readonly url: string;
+}

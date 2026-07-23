@@ -11,13 +11,19 @@ export class ProfileService {
   constructor(private readonly profiles: ProfileRepository) {}
 
   async get(userId: string): Promise<ProfileResponseDto> {
-    const profile = await this.profiles.findByUserId(userId);
+    const profile = await this.findOptional(userId);
 
     if (!profile) {
       throw new NotFoundException(PROFILE_NOT_FOUND);
     }
 
-    return this.toResponse(profile);
+    return profile;
+  }
+
+  async findOptional(userId: string): Promise<ProfileResponseDto | null> {
+    const profile = await this.profiles.findByUserId(userId);
+
+    return profile ? this.toResponse(profile) : null;
   }
 
   async update(
