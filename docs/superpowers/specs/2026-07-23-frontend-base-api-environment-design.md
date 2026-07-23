@@ -7,6 +7,7 @@ Configure the Angular frontend to obtain its base API path from an environment f
 ## Design
 
 - Add `apps/link-sharing/src/environments/environment.ts`.
+- Add `apps/link-sharing/.serve.env` with `PORT=4200` so the frontend serve target does not inherit the backend port from the workspace `.env` file.
 - Export an environment object with `baseApi` set to `/api`.
 - Update `AuthApiService` to pass `environment.baseApi` to `BaseApiService` instead of the hard-coded `/api` string.
 - Keep `apps/link-sharing/proxy.conf.json` unchanged. It already forwards `/api` requests to `http://localhost:3333`.
@@ -21,7 +22,7 @@ For example, login will use the following path:
 
 ## Scope
 
-This change only configures the current frontend development API base path. It does not add a production API URL, runtime configuration, an injection token, or tests.
+This change configures the frontend development server at `http://localhost:4200` and its API base path. It does not add a production API URL, runtime configuration, an injection token, or tests.
 
 ## Verification
 

@@ -6,12 +6,13 @@ import type {
   RegisterResponse,
 } from '@link-sharing/shared-models';
 import type { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { BaseApiService } from './base-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService extends BaseApiService {
   public constructor() {
-    super(inject(HttpClient), '/api');
+    super(inject(HttpClient), environment.baseApi);
   }
 
   public login(credentials: AuthCredentials): Observable<LoginResponse> {
