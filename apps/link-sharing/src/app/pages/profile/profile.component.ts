@@ -17,7 +17,6 @@ import type { UpdateProfile } from '@link-sharing/shared-models';
 import {
   catchError,
   firstValueFrom,
-  forkJoin,
   of,
   throwError,
 } from 'rxjs';
@@ -64,7 +63,12 @@ interface AccountModel {
             Loading your profile…
           </p>
         } @else {
-          <div class="profile-page__form" aria-labelledby="profile-title">
+          <form
+            class="profile-page__form"
+            id="profile-details-form"
+            aria-labelledby="profile-title"
+            (submit)="onSubmit($event)"
+          >
             <section
               aria-labelledby="profile-picture-label"
               class="profile-page__section"
@@ -129,7 +133,7 @@ interface AccountModel {
                 />
               </div>
             </section>
-          </div>
+          </form>
         }
 
         @if (message()) {
@@ -141,12 +145,21 @@ interface AccountModel {
             {{ message() }}
           </p>
         }
+
+        @if (canRetry()) {
+          <div class="profile-page__retry">
+            <app-button variant="secondary" (click)="onRetry()">
+              Retry
+            </app-button>
+          </div>
+        }
       </div>
 
       <div class="profile-page__save" main-template-actions>
         <app-button
+          formId="profile-details-form"
+          type="submit"
           [disabled]="isLoading() || isSubmitting()"
-          (click)="onSave()"
         >
           {{ isSubmitting() ? 'Saving…' : 'Save' }}
         </app-button>
@@ -253,6 +266,10 @@ interface AccountModel {
       &__save {
         min-width: 91px;
       }
+
+      &__retry {
+        width: fit-content;
+      }
     }
 
     @media (width < 760px) {
@@ -323,6 +340,7 @@ export class ProfileComponent implements OnDestroy {
     disabled(path.email);
   });
   public readonly isLoading = signal(true);
+  public readonly canRetry = signal(false);
   public readonly message = signal('');
   public readonly hasError = this.messageIsError.asReadonly();
   public readonly isSubmitting = computed(() =>
@@ -368,48 +386,68 @@ export class ProfileComponent implements OnDestroy {
     this.setError(message);
   }
 
-  public onSave(): void {
+  public onSubmit(event: Event): void {
+    event.preventDefault();
     this.hasSubmitted.set(true);
     this.clearMessage();
     void this.saveProfile();
   }
 
+  public onRetry(): void {
+    void this.loadProfile();
+  }
+
   private async loadProfile(): Promise<void> {
     this.isLoading.set(true);
+    this.canRetry.set(false);
     this.clearMessage();
 
-    try {
-      const result = await firstValueFrom(
-        forkJoin({
-          account: this.authApi.me(),
-          avatar: this.avatarApi.get().pipe(
+    const [accountResult, avatarResult, profileResult] =
+      await Promise.allSettled([
+        firstValueFrom(this.authApi.me()),
+        firstValueFrom(
+          this.avatarApi.get().pipe(
             catchError((error: unknown) =>
               this.isNotFound(error) ? of(null) : throwError(() => error),
             ),
           ),
-          profile: this.profileApi.get().pipe(
+        ),
+        firstValueFrom(
+          this.profileApi.get().pipe(
             catchError((error: unknown) =>
               this.isNotFound(error) ? of(null) : throwError(() => error),
             ),
           ),
-        }),
-      );
+        ),
+      ]);
 
-      this.accountModel.set({ email: result.account.email ?? '' });
+    if (accountResult.status === 'fulfilled') {
+      this.accountModel.set({ email: accountResult.value.email ?? '' });
+    }
 
-      if (result.profile) {
+    if (avatarResult.status === 'fulfilled') {
+      this.avatarUrl.set(avatarResult.value?.avatarUrl ?? null);
+    }
+
+    if (profileResult.status === 'fulfilled') {
+      if (profileResult.value) {
         this.profileModel.set({
-          firstName: result.profile.firstName,
-          lastName: result.profile.lastName,
+          firstName: profileResult.value.firstName,
+          lastName: profileResult.value.lastName,
         });
       }
-
-      this.avatarUrl.set(result.avatar?.avatarUrl ?? null);
-    } catch {
-      this.setError('Unable to load your profile. Please refresh and try again.');
-    } finally {
-      this.isLoading.set(false);
     }
+
+    const hasFailure = [accountResult, avatarResult, profileResult].some(
+      (result) => result.status === 'rejected',
+    );
+
+    if (hasFailure) {
+      this.setError('Unable to load your profile. Please try again.');
+      this.canRetry.set(true);
+    }
+
+    this.isLoading.set(false);
   }
 
   private async saveProfile(): Promise<void> {

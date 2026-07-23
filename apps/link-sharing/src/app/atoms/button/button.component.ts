@@ -18,6 +18,7 @@ export type ButtonType = 'button' | 'submit';
       [matButton]="appearance()"
       [class]="buttonClass()"
       [disabled]="disabled()"
+      [attr.form]="formId()"
       [type]="type()"
     >
       <ng-content />
@@ -27,6 +28,7 @@ export type ButtonType = 'button' | 'submit';
 export class ButtonComponent {
   public readonly variant = input<ButtonVariant>('primary');
   public readonly disabled = input(false);
+  public readonly formId = input<string | null>(null);
   public readonly type = input<ButtonType>('button');
 
   protected readonly appearance = computed<MatButtonAppearance>(() =>
