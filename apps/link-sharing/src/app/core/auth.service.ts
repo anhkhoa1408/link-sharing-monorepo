@@ -21,13 +21,17 @@ export class AuthService {
   }
 
   public isAuthenticated(): boolean {
+    return this.getAccessToken() !== null;
+  }
+
+  public getAccessToken(): string | null {
     let accessToken: unknown;
 
     try {
       accessToken = this.storage.get<unknown>(StorageKey.ACCESS_TOKEN);
     } catch {
       this.storage.delete(StorageKey.ACCESS_TOKEN);
-      return false;
+      return null;
     }
 
     if (
@@ -35,10 +39,10 @@ export class AuthService {
       !this.isAccessTokenValid(accessToken)
     ) {
       this.storage.delete(StorageKey.ACCESS_TOKEN);
-      return false;
+      return null;
     }
 
-    return true;
+    return accessToken;
   }
 
   public logout(): void {

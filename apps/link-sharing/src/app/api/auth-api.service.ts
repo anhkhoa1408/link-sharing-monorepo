@@ -5,6 +5,7 @@ import type {
   LoginResponse,
   RegisterResponse,
 } from '@link-sharing/shared-models';
+import type { User } from '@supabase/supabase-js';
 import type { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { BaseApiService } from './base-api.service';
@@ -20,6 +21,10 @@ export class AuthApiService extends BaseApiService {
       this.endpoint('auth/login'),
       credentials,
     );
+  }
+
+  public me(): Observable<User> {
+    return this.http.get<User>(this.endpoint('auth/me'));
   }
 
   public register(credentials: AuthCredentials): Observable<RegisterResponse> {
