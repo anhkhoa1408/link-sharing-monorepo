@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   email,
   form,
@@ -70,10 +70,6 @@ import { AuthTemplateComponent } from '../../templates/auth-template/auth-templa
             color: var(--color-red-500);
           }
 
-          &--success {
-            background: rgb(99 60 255 / 10%);
-            color: var(--color-purple-600);
-          }
         }
 
         &__register {
@@ -142,12 +138,6 @@ import { AuthTemplateComponent } from '../../templates/auth-template/auth-templa
           </p>
         }
 
-        @if (successMessage()) {
-          <p class="login__message login__message--success" role="status">
-            {{ successMessage() }}
-          </p>
-        }
-
         <app-button type="submit" [disabled]="isSubmitting()">
           {{ isSubmitting() ? 'Logging in…' : 'Login' }}
         </app-button>
@@ -163,6 +153,8 @@ import { AuthTemplateComponent } from '../../templates/auth-template/auth-templa
   `,
 })
 export class LoginComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly authApi = inject(AuthApiService);
   private readonly auth = inject(AuthService);
   private readonly credentials = signal<AuthCredentials>({
@@ -180,7 +172,6 @@ export class LoginComponent {
     });
   });
   public readonly errorMessage = signal('');
-  public readonly successMessage = signal('');
   public readonly isSubmitting = computed(() => this.loginForm().submitting());
   public readonly showEmailError = computed(
     () =>
@@ -199,12 +190,53 @@ export class LoginComponent {
     () => this.loginForm.password().errors()[0]?.message ?? '',
   );
 
+  public constructor() {
+    this.handleAuthCallback();
+  }
+
   public onSubmit(event: Event): void {
     event.preventDefault();
     this.hasSubmitted.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
     void this.submitLogin();
+  }
+
+  private handleAuthCallback(): void {
+    const fragment = this.route.snapshot.fragment;
+
+    if (!fragment) {
+      return;
+    }
+
+    const parameters = new URLSearchParams(fragment);
+    const isAuthCallback =
+      parameters.has('access_token') ||
+      parameters.has('expires_at') ||
+      parameters.has('error') ||
+      parameters.has('type');
+
+    if (!isAuthCallback) {
+      return;
+    }
+
+    const accessToken = parameters.get('access_token');
+    const expiresAtValue = parameters.get('expires_at');
+    const expiresAt = expiresAtValue === null ? null : Number(expiresAtValue);
+    const hasValidCallbackExpiry =
+      expiresAt === null || (Number.isFinite(expiresAt) && expiresAt > Date.now() / 1000);
+
+    if (
+      !accessToken ||
+      !hasValidCallbackExpiry ||
+      !this.auth.saveAccessToken(accessToken)
+    ) {
+      this.errorMessage.set(
+        'The sign-up link is invalid or has expired. Please try again.',
+      );
+      return;
+    }
+
+    void this.router.navigateByUrl('/home', { replaceUrl: true });
   }
 
   private async submitLogin(): Promise<void> {
@@ -213,8 +245,12 @@ export class LoginComponent {
         const session = await firstValueFrom(
           this.authApi.login(submittedForm().value()),
         );
-        this.auth.save(session);
-        this.successMessage.set('Login successful');
+
+        if (!this.auth.save(session)) {
+          throw new Error('The API returned an expired access token.');
+        }
+
+        await this.router.navigateByUrl('/home', { replaceUrl: true });
       } catch (error: unknown) {
         this.errorMessage.set(
           error instanceof HttpErrorResponse && error.status === 401
