@@ -91,9 +91,11 @@ The preview state follows the same node's uploaded variant:
 - `Change Image` label in white, Instrument Sans 16px semibold at 150%
 
 The implementation converts the Figma-generated React/Tailwind reference into
-an Angular inline template and inline SCSS. Add `#EFEBFF` as the `purple-100`
-color token because that Figma color is not currently in the repository; reuse
-the existing tokens for all other represented colors. Do not add Tailwind.
+an Angular inline template. Keep the reusable input-atom styles in
+`apps/link-sharing/src/assets/scss/_input.scss`, as required by the repository's
+SCSS conventions. Add `#EFEBFF` as the `purple-100` color token because that
+Figma color is not currently in the repository; reuse the existing tokens for
+all other represented colors. Do not add Tailwind.
 
 ## Interaction And Accessibility
 
