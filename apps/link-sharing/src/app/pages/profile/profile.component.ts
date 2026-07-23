@@ -466,7 +466,7 @@ export class ProfileComponent implements OnDestroy {
     }
 
     if (profileResult.status === 'fulfilled') {
-      if (profileResult.value) {
+      if (profileResult.value && !this.profileForm().dirty()) {
         this.profileModel.set({
           firstName: profileResult.value.firstName,
           lastName: profileResult.value.lastName,
