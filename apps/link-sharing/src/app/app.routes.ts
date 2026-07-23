@@ -15,5 +15,12 @@ export const appRoutes: Route[] = [
         (module) => module.RegisterComponent,
       ),
   },
+  {
+    path: 'home',
+    loadComponent: () =>
+      import('./pages/home/home.component').then(
+        (module) => module.HomeComponent,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 ];

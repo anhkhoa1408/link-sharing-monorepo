@@ -83,6 +83,24 @@ const TAB_BUTTON_ICONS = {
         flex: 0 0 20px;
       }
     }
+
+    @media (width < 600px) {
+      .tab-button {
+        padding: var(--spacing-200);
+
+        &__label {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+          white-space: nowrap;
+          border: 0;
+        }
+      }
+    }
   `,
 })
 export class TabButtonComponent {
