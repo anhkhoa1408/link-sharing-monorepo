@@ -1,14 +1,5 @@
 import type { Platform } from '@link-sharing/shared-models';
-
-export interface PlatformIconDefinition {
-  readonly path: string;
-  readonly viewBox: string;
-}
-
-export interface PlatformPresentation {
-  readonly icon: PlatformIconDefinition;
-  readonly label: string;
-}
+import type { PlatformPresentation } from '../models/platform-presentation.model';
 
 export const PLATFORM_PRESENTATION = {
   GITHUB: {

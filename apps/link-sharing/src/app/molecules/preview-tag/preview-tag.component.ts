@@ -161,11 +161,11 @@ import { PLATFORM_PRESENTATION } from '../../core/constants/platform-presentatio
       }
 
       &__frontend-mentor-primary {
-        fill: #3f54a3;
+        fill: var(--color-frontend-mentor-primary);
       }
 
       &__frontend-mentor-accent {
-        fill: #67bece;
+        fill: var(--color-frontend-mentor-accent);
       }
 
       &--dev-to &__platform-icon,

@@ -86,7 +86,16 @@ import { TabButtonComponent } from '../../../molecules/tab-button/tab-button.com
 
     @media (width < 600px) {
       .home-header {
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr) auto;
+        gap: var(--spacing-100);
         padding: var(--spacing-200);
+
+        &__navigation {
+          position: static;
+          justify-self: center;
+          transform: none;
+        }
 
         &__preview {
           min-width: 0;

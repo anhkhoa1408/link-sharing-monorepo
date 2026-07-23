@@ -6,11 +6,6 @@ import { HomeHeaderComponent } from './_components/home-header.component';
 import { LinkEditorCardComponent } from './_components/link-editor-card.component';
 import { PhonePreviewComponent } from './_components/phone-preview.component';
 
-interface HomeExampleLinks {
-  githubUrl: string;
-  youtubeUrl: string;
-}
-
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -197,7 +192,7 @@ interface HomeExampleLinks {
   `,
 })
 export class HomeComponent {
-  private readonly exampleLinks = signal<HomeExampleLinks>({
+  private readonly exampleLinks = signal({
     githubUrl: 'https://www.github.com/johnappleseed',
     youtubeUrl: 'https://www.youtube.com/benwright',
   });

@@ -16,15 +16,10 @@ import {
   type MatSelectChange,
   MatSelectTrigger,
 } from '@angular/material/select';
-import {
-  PLATFORM_VALUES,
-  type Platform,
-} from '@link-sharing/shared-models';
+import { PLATFORM_VALUES, type Platform } from '@link-sharing/shared-models';
 
-import {
-  PLATFORM_PRESENTATION,
-  type PlatformPresentation,
-} from '../../core/constants/platform-presentation.constant';
+import { PLATFORM_PRESENTATION } from '../../core/constants/platform-presentation.constant';
+import type { PlatformPresentation } from '../../core/models/platform-presentation.model';
 
 interface PlatformOption extends PlatformPresentation {
   readonly value: Platform;
@@ -45,6 +40,7 @@ const PLATFORM_OPTIONS: readonly PlatformOption[] = PLATFORM_VALUES.map(
         class="platform-select__control"
         panelWidth="auto"
         [attr.aria-invalid]="invalid()"
+        [attr.aria-labelledby]="ariaLabelledBy()"
         [aria-label]="ariaLabel()"
         [canSelectNullableOptions]="true"
         [disabled]="disabled()"
@@ -114,10 +110,7 @@ const PLATFORM_OPTIONS: readonly PlatformOption[] = PLATFORM_VALUES.map(
         </mat-option>
 
         @for (option of options; track option.value) {
-          <mat-option
-            class="platform-select-option"
-            [value]="option.value"
-          >
+          <mat-option class="platform-select-option" [value]="option.value">
             <span class="platform-select-option__content">
               <svg
                 aria-hidden="true"
@@ -292,13 +285,12 @@ const PLATFORM_OPTIONS: readonly PlatformOption[] = PLATFORM_VALUES.map(
     }
   `,
 })
-export class PlatformSelectComponent
-  implements FormValueControl<Platform | null>
-{
+export class PlatformSelectComponent implements FormValueControl<Platform | null> {
   private readonly select = viewChild.required(MatSelect);
 
   public readonly value = model.required<Platform | null>();
   public readonly ariaLabel = input.required<string>();
+  public readonly ariaLabelledBy = input<string | null>(null);
   public readonly placeholder = input('Select a platform');
   public readonly disabled = input(false);
   public readonly required = input(false);
@@ -316,9 +308,7 @@ export class PlatformSelectComponent
     this.select().focus(options);
   }
 
-  protected onSelectionChange(
-    event: MatSelectChange<Platform | null>,
-  ): void {
+  protected onSelectionChange(event: MatSelectChange<Platform | null>): void {
     this.value.set(event.value);
   }
 }

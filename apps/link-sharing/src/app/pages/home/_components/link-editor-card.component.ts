@@ -31,6 +31,7 @@ import { PlatformSelectComponent } from '../../../organisms/platform-select/plat
         <span class="link-card__label" [id]="platformLabelId()">Platform</span>
         <app-platform-select
           [ariaLabel]="'Platform for link ' + index()"
+          [ariaLabelledBy]="platformLabelId()"
           [value]="platform()"
           (valueChange)="platform.set($event)"
         />
