@@ -3,9 +3,7 @@ import {
   Component,
   computed,
   input,
-  type OnDestroy,
   output,
-  signal,
 } from '@angular/core';
 
 @Component({
@@ -36,17 +34,12 @@ import {
     </label>
   `,
 })
-export class ImageUploadComponent implements OnDestroy {
-  private readonly localPreviewUrl = signal<string | null>(null);
-  private objectUrl: string | null = null;
-
+export class ImageUploadComponent {
   public readonly imageUrl = input<string | null>(null);
   public readonly imageSelected = output<File>();
   public readonly fileRejected = output<string>();
 
-  protected readonly previewUrl = computed(
-    () => this.localPreviewUrl() ?? this.imageUrl(),
-  );
+  protected readonly previewUrl = computed(() => this.imageUrl());
   protected readonly hasPreview = computed(() => this.previewUrl() !== null);
   protected readonly actionLabel = computed(() =>
     this.hasPreview() ? 'Change Image' : '+ Upload Image',
@@ -54,10 +47,6 @@ export class ImageUploadComponent implements OnDestroy {
   protected readonly accessibleLabel = computed(() =>
     this.hasPreview() ? 'Change image' : 'Upload image',
   );
-
-  public ngOnDestroy(): void {
-    this.revokeObjectUrl();
-  }
 
   protected onFileSelected(event: Event): void {
     const input = event.currentTarget as HTMLInputElement;
@@ -73,18 +62,6 @@ export class ImageUploadComponent implements OnDestroy {
       return;
     }
 
-    this.revokeObjectUrl();
-    this.objectUrl = URL.createObjectURL(file);
-    this.localPreviewUrl.set(this.objectUrl);
     this.imageSelected.emit(file);
-  }
-
-  private revokeObjectUrl(): void {
-    if (!this.objectUrl) {
-      return;
-    }
-
-    URL.revokeObjectURL(this.objectUrl);
-    this.objectUrl = null;
   }
 }

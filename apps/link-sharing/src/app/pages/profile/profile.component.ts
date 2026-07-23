@@ -10,8 +10,10 @@ import {
 import {
   disabled,
   form,
+  maxLength,
   required,
   submit,
+  validate,
 } from '@angular/forms/signals';
 import type { UpdateProfile } from '@link-sharing/shared-models';
 import {
@@ -99,9 +101,15 @@ interface AccountModel {
               class="profile-page__section profile-page__details"
             >
               <div class="profile-page__field">
-                <span class="profile-page__field-label">First name*</span>
+                <label
+                  class="profile-page__field-label"
+                  for="profile-first-name"
+                >
+                  First name*
+                </label>
                 <app-input
                   ariaLabel="First name"
+                  inputId="profile-first-name"
                   placeholder="e.g. John"
                   [icon]="null"
                   [errorMessage]="firstNameError()"
@@ -111,9 +119,15 @@ interface AccountModel {
               </div>
 
               <div class="profile-page__field">
-                <span class="profile-page__field-label">Last name*</span>
+                <label
+                  class="profile-page__field-label"
+                  for="profile-last-name"
+                >
+                  Last name*
+                </label>
                 <app-input
                   ariaLabel="Last name"
+                  inputId="profile-last-name"
                   placeholder="e.g. Appleseed"
                   [icon]="null"
                   [errorMessage]="lastNameError()"
@@ -123,10 +137,16 @@ interface AccountModel {
               </div>
 
               <div class="profile-page__field">
-                <span class="profile-page__field-label">Email</span>
+                <label
+                  class="profile-page__field-label"
+                  for="profile-email"
+                >
+                  Email
+                </label>
                 <app-input
                   ariaLabel="Email"
                   icon="email"
+                  inputId="profile-email"
                   placeholder="e.g. email@example.com"
                   type="email"
                   [formField]="accountForm.email"
@@ -334,7 +354,23 @@ export class ProfileComponent implements OnDestroy {
   public readonly account = this.accountModel.asReadonly();
   public readonly profileForm = form(this.profileModel, (path) => {
     required(path.firstName, { message: 'First name is required' });
+    validate(path.firstName, ({ value }) =>
+      value().trim()
+        ? undefined
+        : { kind: 'trimmedRequired', message: 'First name is required' },
+    );
+    maxLength(path.firstName, 80, {
+      message: 'First name must be 80 characters or fewer',
+    });
     required(path.lastName, { message: 'Last name is required' });
+    validate(path.lastName, ({ value }) =>
+      value().trim()
+        ? undefined
+        : { kind: 'trimmedRequired', message: 'Last name is required' },
+    );
+    maxLength(path.lastName, 80, {
+      message: 'Last name must be 80 characters or fewer',
+    });
   });
   public readonly accountForm = form(this.accountModel, (path) => {
     disabled(path.email);

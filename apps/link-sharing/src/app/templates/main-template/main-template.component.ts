@@ -239,12 +239,23 @@ const DEFAULT_PREVIEW_LINKS: readonly PreviewLink[] = [
         gap: var(--spacing-200);
         padding: var(--spacing-200);
 
+        &__header {
+          grid-template-columns: 32px minmax(0, 1fr);
+        }
+
+        &__navigation {
+          justify-self: end;
+        }
+
         &__header-actions {
+          width: 100%;
+          grid-column: 1 / -1;
           gap: var(--spacing-100);
         }
 
         &__header-action {
           min-width: 0;
+          flex: 1 1 0;
         }
 
         &__editor-content {
