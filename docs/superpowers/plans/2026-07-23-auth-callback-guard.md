@@ -35,7 +35,7 @@ Add a private helper that splits the JWT, base64url-decodes its payload, parses 
 
 - [ ] **Step 2: Implement validity-aware persistence**
 
-Make `saveAccessToken()` compare `exp` against `Date.now() / 1000`, delete stale storage on rejection, and persist the raw token only on success. Have `save()` delegate to it.
+Make `saveAccessToken()` compare `exp` against `Date.now() / 1000`, leave an existing session untouched on rejection, and persist the raw token only on success. Have `save()` delegate to it.
 
 - [ ] **Step 3: Implement the guard-facing query**
 

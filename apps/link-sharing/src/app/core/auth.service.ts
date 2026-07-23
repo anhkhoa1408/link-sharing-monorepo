@@ -13,7 +13,6 @@ export class AuthService {
 
   public saveAccessToken(accessToken: string): boolean {
     if (!this.isAccessTokenValid(accessToken)) {
-      this.storage.delete(StorageKey.ACCESS_TOKEN);
       return false;
     }
 
