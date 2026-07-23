@@ -9,6 +9,7 @@ import { AppCacheModule } from './cache/app-cache.module';
 import { HealthController } from './health/health.controller';
 import { HealthService } from './health/health.service';
 import { LinkModule } from './link/link.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LinkModule } from './link/link.module';
     AuthModule,
     AvatarModule,
     LinkModule,
+    ProfileModule,
   ],
   controllers: [HealthController],
   providers: [HealthService],
