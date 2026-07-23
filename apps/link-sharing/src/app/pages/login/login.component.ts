@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   email,
   form,
@@ -19,68 +19,21 @@ import { firstValueFrom } from 'rxjs';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { AuthApiService } from '../../api/auth-api.service';
-import { AuthSessionService } from '../../auth/auth-session.service';
+import { AuthService } from '../../core/auth.service';
+import { AuthTemplateComponent } from '../../templates/auth-template/auth-template.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonComponent, InputComponent, NgOptimizedImage],
+  imports: [AuthTemplateComponent, ButtonComponent, InputComponent, RouterLink],
   selector: 'app-login',
   styles: `
     :host {
-      display: block;
-      min-height: 100dvh;
-
       .login {
-        display: grid;
-        min-height: 100dvh;
-        padding: var(--spacing-500) var(--spacing-300);
-        place-items: center;
-        background: var(--color-grey-50);
-
-        &__container {
-          display: flex;
-          width: min(100%, 476px);
-          flex-direction: column;
-          align-items: center;
-          gap: var(--spacing-600);
-        }
-
-        &__logo {
-          width: 183px;
-          height: 40px;
-        }
-
-        &__card {
-          display: flex;
-          width: 100%;
-          flex-direction: column;
-          gap: var(--spacing-500);
-          padding: var(--spacing-500);
-          border-radius: 12px;
-          background: var(--color-white);
-        }
-
-        &__header {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-100);
-        }
-
-        &__title,
-        &__description,
         &__message,
         &__register {
           margin: 0;
         }
 
-        &__title {
-          color: var(--color-grey-900);
-          font-size: var(--font-size-32);
-          font-weight: var(--font-weight-bold);
-          line-height: var(--line-height-150);
-        }
-
-        &__description,
         &__register {
           color: var(--color-grey-500);
           font-size: var(--font-size-16);
@@ -129,29 +82,18 @@ import { AuthSessionService } from '../../auth/auth-session.service';
 
         &__register-action {
           color: var(--color-purple-600);
+          text-decoration: none;
+
+          &:focus-visible {
+            border-radius: 2px;
+            outline: 2px solid var(--color-purple-600);
+            outline-offset: 2px;
+          }
         }
       }
 
       @media (width < 600px) {
         .login {
-          padding: var(--spacing-400) var(--spacing-300);
-          place-items: start center;
-
-          &__container {
-            align-items: flex-start;
-            gap: var(--spacing-600);
-          }
-
-          &__card {
-            gap: var(--spacing-500);
-            padding: 0;
-            background: transparent;
-          }
-
-          &__title {
-            font-size: var(--font-size-24);
-          }
-
           &__register {
             display: flex;
             flex-direction: column;
@@ -161,83 +103,68 @@ import { AuthSessionService } from '../../auth/auth-session.service';
     }
   `,
   template: `
-    <main class="login">
-      <div class="login__container">
-        <img
-          alt="Devlinks"
-          class="login__logo"
-          height="40"
-          ngSrc="images/logo-devlinks-large.svg"
-          priority
-          width="183"
-        />
+    <app-auth-template
+      description="Add your details below to get back into the app"
+      title="Login"
+    >
+      <form class="login__form" novalidate (submit)="onSubmit($event)">
+        <label class="login__field" for="login-email">
+          <span class="login__label">Email address</span>
+          <app-input
+            ariaLabel="Email address"
+            icon="email"
+            inputId="login-email"
+            placeholder="e.g. alex@email.com"
+            type="email"
+            [errorMessage]="emailErrorMessage()"
+            [formField]="loginForm.email"
+            [isError]="showEmailError()"
+          />
+        </label>
 
-        <section class="login__card" aria-labelledby="login-title">
-          <header class="login__header">
-            <h1 class="login__title" id="login-title">Login</h1>
-            <p class="login__description">
-              Add your details below to get back into the app
-            </p>
-          </header>
+        <label class="login__field" for="login-password">
+          <span class="login__label">Password</span>
+          <app-input
+            ariaLabel="Password"
+            icon="password"
+            inputId="login-password"
+            placeholder="Enter your password"
+            type="password"
+            [errorMessage]="passwordErrorMessage()"
+            [formField]="loginForm.password"
+            [isError]="showPasswordError()"
+          />
+        </label>
 
-          <form class="login__form" novalidate (submit)="onSubmit($event)">
-            <label class="login__field" for="login-email">
-              <span class="login__label">Email address</span>
-              <app-input
-                ariaLabel="Email address"
-                icon="email"
-                inputId="login-email"
-                placeholder="e.g. alex@email.com"
-                type="email"
-                [errorMessage]="emailErrorMessage()"
-                [formField]="loginForm.email"
-                [isError]="showEmailError()"
-              />
-            </label>
+        @if (errorMessage()) {
+          <p class="login__message login__message--error" role="alert">
+            {{ errorMessage() }}
+          </p>
+        }
 
-            <label class="login__field" for="login-password">
-              <span class="login__label">Password</span>
-              <app-input
-                ariaLabel="Password"
-                icon="password"
-                inputId="login-password"
-                placeholder="Enter your password"
-                type="password"
-                [errorMessage]="passwordErrorMessage()"
-                [formField]="loginForm.password"
-                [isError]="showPasswordError()"
-              />
-            </label>
+        @if (successMessage()) {
+          <p class="login__message login__message--success" role="status">
+            {{ successMessage() }}
+          </p>
+        }
 
-            @if (errorMessage()) {
-              <p class="login__message login__message--error" role="alert">
-                {{ errorMessage() }}
-              </p>
-            }
+        <app-button type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Logging in…' : 'Login' }}
+        </app-button>
 
-            @if (successMessage()) {
-              <p class="login__message login__message--success" role="status">
-                {{ successMessage() }}
-              </p>
-            }
-
-            <app-button type="submit" [disabled]="isSubmitting()">
-              {{ isSubmitting() ? 'Logging in…' : 'Login' }}
-            </app-button>
-
-            <p class="login__register">
-              Don’t have an account?
-              <span class="login__register-action">Create account</span>
-            </p>
-          </form>
-        </section>
-      </div>
-    </main>
+        <p class="login__register">
+          Don’t have an account?
+          <a class="login__register-action" routerLink="/register">
+            Create account
+          </a>
+        </p>
+      </form>
+    </app-auth-template>
   `,
 })
 export class LoginComponent {
   private readonly authApi = inject(AuthApiService);
-  private readonly authSession = inject(AuthSessionService);
+  private readonly auth = inject(AuthService);
   private readonly credentials = signal<AuthCredentials>({
     email: '',
     password: '',
@@ -286,7 +213,7 @@ export class LoginComponent {
         const session = await firstValueFrom(
           this.authApi.login(submittedForm().value()),
         );
-        this.authSession.save(session);
+        this.auth.save(session);
         this.successMessage.set('Login successful');
       } catch (error: unknown) {
         this.errorMessage.set(

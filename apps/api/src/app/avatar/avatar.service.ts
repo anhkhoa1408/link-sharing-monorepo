@@ -7,10 +7,10 @@ import {
   AVATAR_NOT_FOUND,
   AVATAR_SIGNED_URL_TTL_SECONDS,
   AVATAR_STORAGE_UNAVAILABLE,
-} from './avatar.constants';
-import { AvatarStorageError } from './avatar.errors';
+} from './constants/avatar.constants';
+import { AvatarStorageError } from './errors/avatar.errors';
 import { AvatarRepository } from './avatar.repository';
-import { AvatarFile } from './avatar.types';
+import { AvatarFile } from './types/avatar.types';
 import { AvatarResponseDto } from './dto/avatar-response.dto';
 
 @Injectable()

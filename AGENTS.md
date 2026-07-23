@@ -24,9 +24,9 @@
 
 @rules/angular-conventions.md
 
-## SCSS Conventions
+## Style Conventions
 
-@rules/scss-conventions.md
+@rules/style-conventions.md
 
 ## Folder Structure Conventions
 
@@ -34,18 +34,7 @@
 
 ## NestJS Conventions
 
-- Follow NestJS best practices and organize the API into cohesive feature modules.
-- Do not create or add tests of any kind for the NestJS API.
-- Follow MVC with this dependency flow: `Controller -> Service -> Repository -> Database`.
-- Controllers handle HTTP input/output only and must remain thin.
-- Services coordinate business rules and use cases; they must not query Prisma directly.
-- Repositories own all database access, queries, persistence, and Prisma calls.
-- Models/entities represent domain data; DTOs define validated API contracts.
-- Inject dependencies through Nest providers; do not construct infrastructure clients in features.
-- Export public providers from modules instead of importing another feature's internals.
-- Validate request data with DTOs and validate environment variables at startup.
-- Use Nest exceptions and centralized filters/interceptors for consistent API errors.
-- Keep transport, business, and persistence concerns separate.
+@rules/nestjs-conventions.md
 
 ## Testing Conventions
 
@@ -54,13 +43,9 @@
 
 ## Data and Infrastructure
 
-- Inject `PrismaService` into repositories only.
-- Never edit `apps/api/src/generated/prisma`; regenerate it through the Nx Prisma target.
-- Prisma owns product-domain tables and migrations.
-- Supabase owns its Auth and Storage schemas; do not manage them with Prisma migrations.
-- Use the existing `SupabaseModule` and `SupabaseService` for backend Auth/Storage access.
-- Privileged Supabase operations belong in the API, never in Angular.
-- Access Redis through the Nest cache abstraction, not ad hoc Redis clients.
+- Use `PrismaService` only in repositories. Prisma owns product-domain tables and migrations; regenerate `apps/api/src/generated/prisma` through Nx instead of editing it.
+- Supabase owns Auth and Storage schemas. Use the existing `SupabaseModule` and `SupabaseService`, keep privileged operations in the API, and never manage these schemas with Prisma.
+- Access Redis through the Nest cache abstraction, not ad hoc clients.
 - Never expose `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL`, or `REDIS_URL`.
 
 ## Commands

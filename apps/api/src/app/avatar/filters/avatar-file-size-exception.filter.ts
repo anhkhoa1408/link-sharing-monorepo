@@ -6,7 +6,7 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { AVATAR_FILE_TOO_LARGE } from './avatar.constants';
+import { AVATAR_FILE_TOO_LARGE } from '../constants/avatar.constants';
 
 @Catch(PayloadTooLargeException)
 export class AvatarFileSizeExceptionFilter

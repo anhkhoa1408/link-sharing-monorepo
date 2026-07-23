@@ -2,8 +2,8 @@ import { FileValidator } from '@nestjs/common';
 import {
   AVATAR_ALLOWED_MIME_TYPES,
   AVATAR_MIME_TYPE_INVALID,
-} from './avatar.constants';
-import { AvatarFile } from './avatar.types';
+} from '../constants/avatar.constants';
+import { AvatarFile } from '../types/avatar.types';
 
 export class AvatarMimeTypeValidator extends FileValidator<
   Record<string, never>,

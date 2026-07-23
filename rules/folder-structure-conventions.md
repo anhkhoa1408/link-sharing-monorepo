@@ -21,8 +21,13 @@ All paths in this document are relative to `apps/link-sharing/src/app`.
 
 ## Page Scope
 
+- Place route-level components in `pages/<feature>/<feature>.component.ts`.
 - Place a service used by only one page in `pages/<page>/_services` and provide it at the page or route scope, not globally. For example: `pages/login/_services/login.service.ts`.
 - Place page-only directives in `pages/<page>/_directives`.
 - Place page-only route guards in `pages/<page>/_guards`.
 - Place page-only models, constants, and utilities in `pages/<page>/_models`, `pages/<page>/_constants`, and `pages/<page>/_utils`.
 - Use the same underscore-prefixed pattern for other page-private implementation groups when needed, and do not expose them as application-wide dependencies.
+
+## Reusable UI
+
+- Place reusable UI components in the directory that matches their Atomic Design responsibility: `atoms`, `molecules`, `organisms`, or `templates`.

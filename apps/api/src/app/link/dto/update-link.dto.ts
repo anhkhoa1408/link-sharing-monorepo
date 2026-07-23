@@ -1,8 +1,8 @@
-import { IsEnum, IsUrl } from 'class-validator';
-import { Platform } from '../../../generated/prisma/enums';
+import { PLATFORM_VALUES, type Platform } from '@link-sharing/shared-models';
+import { IsIn, IsUrl } from 'class-validator';
 
 export class UpdateLinkDto {
-  @IsEnum(Platform)
+  @IsIn(PLATFORM_VALUES)
   platform!: Platform;
 
   @IsUrl({ protocols: ['https'], require_protocol: true })

@@ -31,7 +31,7 @@ The NestJS validation DTO implements `AuthCredentials` so decorators remain API-
 - `LoginComponent`: lazy page component responsible for layout, inline SCSS, Signal Form state, submit interaction, and presentation-ready messages.
 - `BaseApiService`: receives `HttpClient` and the same-origin backend base URL `/api` through its constructor and builds endpoint URLs.
 - `AuthApiService`: extends `BaseApiService` and owns the login HTTP mutation.
-- `AuthSessionService`: owns the `localStorage` session key and persists successful login responses.
+- `AuthService`: lives in `core`, owns the `localStorage` session key, and persists successful login responses.
 - Existing `InputComponent`: gains explicit email/password icon variants needed by the design.
 - Existing `ButtonComponent`: gains native submit type support and remains responsible only for button presentation.
 

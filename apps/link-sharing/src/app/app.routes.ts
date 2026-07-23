@@ -8,5 +8,12 @@ export const appRoutes: Route[] = [
         (module) => module.LoginComponent,
       ),
   },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./pages/register/register.component').then(
+        (module) => module.RegisterComponent,
+      ),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 ];

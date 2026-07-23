@@ -17,11 +17,11 @@ import { AuthenticatedPrincipal } from '../auth/strategies/jwt.strategy';
 import {
   AVATAR_FILE_FIELD,
   AVATAR_MAX_FILE_SIZE_BYTES,
-} from './avatar.constants';
-import { AvatarFileSizeExceptionFilter } from './avatar-file-size-exception.filter';
-import { AvatarMimeTypeValidator } from './avatar-mime-type.validator';
+} from './constants/avatar.constants';
+import { AvatarFileSizeExceptionFilter } from './filters/avatar-file-size-exception.filter';
 import { AvatarService } from './avatar.service';
-import { AvatarFile } from './avatar.types';
+import { AvatarFile } from './types/avatar.types';
+import { AvatarMimeTypeValidator } from './validators/avatar-mime-type.validator';
 import { AvatarResponseDto } from './dto/avatar-response.dto';
 
 interface AuthenticatedRequest {

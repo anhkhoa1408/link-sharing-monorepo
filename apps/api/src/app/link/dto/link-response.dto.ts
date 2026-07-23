@@ -1,4 +1,4 @@
-import { Platform } from '../../../generated/prisma/enums';
+import type { Platform } from '@link-sharing/shared-models';
 
 export class LinkResponseDto {
   id!: string;

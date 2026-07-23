@@ -1,4 +1,4 @@
-import { Platform } from '../../../generated/prisma/enums';
+import type { Platform } from '@link-sharing/shared-models';
 import { PLATFORM_HOSTS } from '../constants/link.constants';
 import { InvalidLinkUrlError } from '../errors/link.errors';
 

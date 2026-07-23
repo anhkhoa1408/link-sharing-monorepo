@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseService } from '../supabase/supabase.service';
-import { AVATAR_SIGNED_URL_TTL_SECONDS } from './avatar.constants';
-import { AvatarStorageError } from './avatar.errors';
-import { AvatarFile } from './avatar.types';
+import { AVATAR_SIGNED_URL_TTL_SECONDS } from './constants/avatar.constants';
+import { AvatarStorageError } from './errors/avatar.errors';
+import { AvatarFile } from './types/avatar.types';
 
 @Injectable()
 export class AvatarRepository {

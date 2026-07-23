@@ -13,3 +13,8 @@ export interface LoginResponse {
   expiresIn: number;
   expiresAt?: number;
 }
+
+export interface RegisterResponse {
+  user: User;
+  requiresEmailConfirmation: true;
+}
